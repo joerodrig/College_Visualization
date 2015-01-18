@@ -2,13 +2,14 @@
   <library name="Generated files" type="javaScript">
     <properties>
       <sourceFilesUrls>
-        <item url="file://$PROJECT_DIR$/js/committee_graph_test.js" />
         <item url="file://$PROJECT_DIR$/js/committee_graph.js" />
+        <item url="file://$PROJECT_DIR$/server.js" />
       </sourceFilesUrls>
     </properties>
     <CLASSES>
-      <root url="file://$PROJECT_DIR$/js/committee_graph.js" />
       <root url="file://$PROJECT_DIR$/js/committee_graph_test.js" />
+      <root url="file://$PROJECT_DIR$/public/js/committee_graph.js" />
+      <root url="file://$PROJECT_DIR$/server.js" />
     </CLASSES>
     <SOURCES />
   </library>
