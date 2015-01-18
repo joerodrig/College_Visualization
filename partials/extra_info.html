@@ -1,0 +1,25 @@
+<div class="col-xs-12 noLeftPadding " id="extra_info">
+    <div class="extra_info_header">
+        <p class="text-center">
+            <span>Committee Information</span>
+            <span ng-show="showExtraInfo" ng-click="toggleExtraInfo(false)" class="pull-right glyphicon glyphicon-minus"></span>
+            <span ng-show="!showExtraInfo" ng-click="toggleExtraInfo(true)" class="pull-right glyphicon glyphicon-plus"></span>
+
+        </p>
+    </div>
+    <div ng-show="showExtraInfo">
+        <p class="extra_info_header noselect">Positions</p>
+        <ul class="noselect">
+            <li class="positions_item" ng-repeat="p in positionCount">
+                ({{p.count}}){{p.position}}
+            </li>
+        </ul>
+
+        <p class="extra_info_header noselect">Departments</p>
+        <ul class="noselect">
+            <li class="departments_item" ng-repeat="d in departmentCount">
+                ({{d.count}}){{d.department}}
+            </li>
+        </ul>
+    </div>
+</div>
