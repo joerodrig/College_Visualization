@@ -1,0 +1,112 @@
+{
+  "School of Humanities and Sciences":
+    {
+      "short_name": "Humanities and Sciences",
+      "departments": [
+        "Department of Anthropology",
+        "Department of English",
+        "Graduate Study in Education",
+        "Department of Education",
+        "Department of Psychology",
+        "Department of Philosophy and Religion",
+        "Department of Communication Studies",
+        "Adjunct, Department of Theatre Arts",
+        "Department of History",
+        "Department of Sociology",
+        "Department of Chemistry",
+        "Department of Mathematics",
+        "Department of Writing",
+        "Department of Computer Science",
+        "Department of Modern Languages and Literatures",
+        "Department of Environmental Studies and Sciences",
+        "Classical Studies",
+        "Women's and Gender Studies",
+        "Department of Theatre Arts",
+        "Department of Art",
+        "Latin American Studies",
+        "Environmental Studies and Science",
+        "Department of Politics",
+        "Biochemistry",
+        "Gerontology",
+        "Department of Biology",
+        "Department of Art History",
+        "Department of Economics",
+        "Native American Studies",
+        "Physics and Astronomy",
+        "Culture and Communication",
+        "Medieval and Renaissance Studies",
+        "Mathematics and Computer Science",
+        "Planned Studies Program",
+        "Department of Physics and Astronomy"
+      ]
+    }
+  ,
+  "School of Music":
+    {
+      "short_name": "Music",
+      "departments": [
+        "Music Theory, History, and Composition",
+        "Music Education",
+        "Performance Studies"
+      ]
+    }
+  ,
+  "School of Health Sciences and Human Performance":
+    {
+      "short_name": "Health Sciences and Human Performance",
+      "departments": [
+        "Department of Exercise and Sport Sciences",
+        "Physical Therapy Rochester",
+        "Department of Occupational Therapy",
+        "Department of Health Promotion and Physical Education",
+        "Department of Physical Therapy",
+        "Health Science and Human Perf/Hill Center",
+        "Department of Sport Management and Media",
+        "Physical Therapy Graduate Portion",
+        "Health Promotion and Human Movement",
+        "Health Sciences and Human Performance Preprofessional Program",
+        "Premed Option",
+        "Graduate Study in Health Promotion and Physical Education",
+        "Health Science and Human Perf/Smiddy",
+        "Preoptometry Option",
+        "Health Science&Human Perf/Hill Ctr",
+        "Department of Recreation and Leisure Studies",
+        "Department of Speech-Language Pathology and Audiology",
+        "Graduate Study in Speech-Language Pathology and Audiology"
+      ]
+    }
+  ,
+  "Roy H. Park School of Communications":
+    {
+      "short_name": "Park School of Communications",
+      "departments": [
+        "Television-Radio",
+        "Television and Radio",
+        "Strategic Communication",
+        "Communication Management and Design",
+        "Documentary Studies and Production",
+        "Graduate Study in Executive Master's in Communications Innovation",
+        "Emerging Media Degree",
+        "Cinema and Photography",
+        "Graduate Study in Communications",
+        "Integrated Marketing Communications",
+        "Org Comm Learning and Design",
+        "Executive Masters in Communications Innovation",
+        "Department of Journalism"
+      ]
+    }
+  ,
+  "School of Business":
+    {
+      "short_name": "Business",
+      "departments": [
+        "Legal Studies",
+        "Management",
+        "Graduate Study in Business",
+        "Finance and International Business",
+        "Marketing and Law",
+        "Marketing"
+      ]
+    }
+
+}

@@ -1,5 +1,6 @@
 class CommitteeGraph
   constructor: () ->
+
   initialize: (element, data, options) ->
     console.log("Initializing Committee Graph")
     return new cGraph(element, data, options)
@@ -10,8 +11,8 @@ class cGraph
 
 
 class Controller
-  constructor: (@data, options) ->
-    employeeGraph = new EmployeeGraph(options)
+  constructor: (data, options) ->
+    employeeGraph = new EmployeeGraph(data.schoolLinker,options)
     return {
     updateGraph: (members) =>
       employeeGraph.updateGraph(members)
@@ -19,7 +20,7 @@ class Controller
 
 
 class Graph
-  constructor: (@options) ->
+  constructor: (@schools,@options) ->
     @activeFilters   = []
     @graph           = Viva.Graph.graph();
     @graphParameters = {
@@ -57,8 +58,13 @@ class Graph
   defaultLayout: () =>
     layout   = Viva.Graph.Layout.forceDirected(@graph,
       springTransform:  (link, spring) ->
-        spring.coeff = 0.00003
-        spring.length = 300
+        if link.data is 1
+          spring.coeff = 0.00003
+          spring.length = 350
+          spring.weight = 2
+        else if link.data is 2
+          spring.length = 300
+          spring.coeff = 0.0003
         gravity: -10
     )
 
@@ -104,7 +110,6 @@ class EmployeeGraph extends Graph
     for member in members
       memberNames.push(member.name)
 
-
     @graph.forEachNode( (node) =>
       if (node.id not in memberNames) then @graph.removeNode(node.id)
       return
@@ -113,9 +118,20 @@ class EmployeeGraph extends Graph
     for member in members
       @addNode(member,"user")
       for workInfo in member.workInfo
-        if workInfo.location.indexOf("School") > -1 then @addNode(workInfo,"school")
-        else  @addNode(workInfo,"department")
-        @graph.addLink(member.name,workInfo.location)
+        if workInfo.location.indexOf("School") > -1
+          if member.workInfo.length == 1
+            if @graph.getNode(workInfo.location) is undefined then @addNode(workInfo,"school")
+            @graph.addLink(member.name,workInfo.location,1)
+        else
+          @addNode(workInfo,"department")
+          @graph.addLink(member.name,workInfo.location,1)
+          #Find out which school department is in
+          for school,vals of @schools
+            for department in @schools[school].departments
+              if department is workInfo.location
+                if @graph.getNode(school) is undefined then @addNode({location:school},"school")
+                @graph.addLink(workInfo.location,school,2)
+
 
     #TODO: Add more user details to addnode. Also possibly add more details to locations
 

@@ -31,8 +31,7 @@
   Controller = (function() {
     function Controller(data, options) {
       var employeeGraph;
-      this.data = data;
-      employeeGraph = new EmployeeGraph(options);
+      employeeGraph = new EmployeeGraph(data.schoolLinker, options);
       return {
         updateGraph: (function(_this) {
           return function(members) {
@@ -47,7 +46,8 @@
   })();
 
   Graph = (function() {
-    function Graph(options) {
+    function Graph(schools, options) {
+      this.schools = schools;
       this.options = options;
       this.addLink = __bind(this.addLink, this);
       this.addNode = __bind(this.addNode, this);
@@ -84,8 +84,14 @@
       var layout;
       layout = Viva.Graph.Layout.forceDirected(this.graph, {
         springTransform: function(link, spring) {
-          spring.coeff = 0.00003;
-          spring.length = 300;
+          if (link.data === 1) {
+            spring.coeff = 0.00003;
+            spring.length = 350;
+            spring.weight = 2;
+          } else if (link.data === 2) {
+            spring.length = 300;
+            spring.coeff = 0.0003;
+          }
           return {
             gravity: -10
           };
@@ -140,7 +146,7 @@
     }
 
     EmployeeGraph.prototype.updateGraph = function(members) {
-      var member, memberNames, workInfo, _i, _j, _len, _len1, _results;
+      var department, member, memberNames, school, vals, workInfo, _i, _j, _len, _len1, _results;
       memberNames = [];
       for (_i = 0, _len = members.length; _i < _len; _i++) {
         member = members[_i];
@@ -165,11 +171,46 @@
           for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
             workInfo = _ref[_k];
             if (workInfo.location.indexOf("School") > -1) {
-              this.addNode(workInfo, "school");
+              if (member.workInfo.length === 1) {
+                if (this.graph.getNode(workInfo.location) === void 0) {
+                  this.addNode(workInfo, "school");
+                }
+                _results1.push(this.graph.addLink(member.name, workInfo.location, 1));
+              } else {
+                _results1.push(void 0);
+              }
             } else {
               this.addNode(workInfo, "department");
+              this.graph.addLink(member.name, workInfo.location, 1);
+              _results1.push((function() {
+                var _ref1, _results2;
+                _ref1 = this.schools;
+                _results2 = [];
+                for (school in _ref1) {
+                  vals = _ref1[school];
+                  _results2.push((function() {
+                    var _l, _len3, _ref2, _results3;
+                    _ref2 = this.schools[school].departments;
+                    _results3 = [];
+                    for (_l = 0, _len3 = _ref2.length; _l < _len3; _l++) {
+                      department = _ref2[_l];
+                      if (department === workInfo.location) {
+                        if (this.graph.getNode(school) === void 0) {
+                          this.addNode({
+                            location: school
+                          }, "school");
+                        }
+                        _results3.push(this.graph.addLink(workInfo.location, school, 2));
+                      } else {
+                        _results3.push(void 0);
+                      }
+                    }
+                    return _results3;
+                  }).call(this));
+                }
+                return _results2;
+              }).call(this));
             }
-            _results1.push(this.graph.addLink(member.name, workInfo.location));
           }
           return _results1;
         }).call(this));

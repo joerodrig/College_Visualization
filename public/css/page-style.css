@@ -19,7 +19,7 @@ body {
     border-bottom:solid 1px white;
     margin-bottom:0;
     border-radius:0;
-    height:10%;
+    height:8%;
 }
 
 
@@ -30,7 +30,8 @@ body {
     height: 100% !important;
     background-color: #1E4F70;
     padding-right: 0;
-
+    padding-left:0;
+    overflow-y:scroll;
 }
 
 .committee{
@@ -58,7 +59,14 @@ body {
     position:absolute;
     z-index:1;
     background-color:#1E5270;
+    padding-right:0;
 }
+
+#extra_info.maximized{
+    height:75%;
+    overflow-y:scroll;
+}
+
 .extra_info_header{
     color:white;
     margin-top:15px;
@@ -66,10 +74,22 @@ body {
     border-bottom:solid 1px rgba(133, 133, 133, 0.25);
 }
 
+#position_department_count {
+    height:80%;
+}
+.position_count,.department_count {
+    max-height:80%;
+}
+
+
 #extra_info ul {
     list-style-type: none;
     color:#ACB4C1;
     cursor:pointer;
+    max-height:40%;
+    overflow-y:scroll;
+    padding-left:10px;
+    margin-bottom:0;
 }
 
 .positions_item,.departments_item{

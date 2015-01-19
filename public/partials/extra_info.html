@@ -1,4 +1,4 @@
-<div class="col-xs-12 noLeftPadding " id="extra_info">
+<div class="col-xs-3" id="extra_info" ng-class="{'maximized' : showExtraInfo}">
     <div class="extra_info_header">
         <p class="text-center">
             <span>Committee Information</span>
@@ -7,16 +7,16 @@
 
         </p>
     </div>
-    <div ng-show="showExtraInfo">
+    <div id="position_department_count" ng-show="showExtraInfo">
         <p class="extra_info_header noselect">Positions</p>
-        <ul class="noselect">
+        <ul class=" position_count noselect">
             <li class="positions_item" ng-repeat="p in positionCount">
                 ({{p.count}}){{p.position}}
             </li>
         </ul>
 
         <p class="extra_info_header noselect">Departments</p>
-        <ul class="noselect">
+        <ul class=" department_count noselect">
             <li class="departments_item" ng-repeat="d in departmentCount">
                 ({{d.count}}){{d.department}}
             </li>
