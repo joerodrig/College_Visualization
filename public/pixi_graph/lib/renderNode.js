@@ -1,6 +1,6 @@
-module.exports = function (animatedNode, ctx) {
-  animatedNode.renderFrame();
+module.exports = function (nodeProperties, ctx) {
+  //nodeProperties.renderFrame();
   ctx.lineStyle(0);
-  ctx.beginFill(animatedNode.color,1);
-  ctx.drawCircle(animatedNode.pos.x, animatedNode.pos.y, animatedNode.width);
+  ctx.beginFill(nodeProperties.color,1);
+  ctx.drawCircle(nodeProperties.pos.x, nodeProperties.pos.y, nodeProperties.width);
 }

@@ -3,8 +3,8 @@
     "start": "node_modules/.bin/browserify -s ngraph pixi_loader.js > pixi_bundle.js"
   },
   "dependencies": {
-    "ngraph.generators": "0.0.2",
-    "ngraph.pixi": "0.0.0"
+    "ngraph.graph": "0.0.6",
+    "ngraph.pixi": "0.0.1"
   },
   "devDependencies": {
     "browserify": "~3.18.0"

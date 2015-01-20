@@ -47,6 +47,7 @@
 
   Graph = (function() {
     function Graph(schools, options) {
+      var createdGraph;
       this.schools = schools;
       this.options = options;
       this.addLink = __bind(this.addLink, this);
@@ -54,51 +55,19 @@
       this.updateGraph = __bind(this.updateGraph, this);
       this.defaultLayout = __bind(this.defaultLayout, this);
       this.defaultGraphics = __bind(this.defaultGraphics, this);
+      createdGraph = new ngraph.start();
       this.activeFilters = [];
-      this.graph = Viva.Graph.graph();
+      this.graph = createdGraph.graph;
       this.graphParameters = {
-        graphics: this.defaultGraphics(),
-        layout: this.defaultLayout()
+        graphics: createdGraph.graphics
       };
+      this.graphParameters.graphics.run();
       return;
     }
 
-    Graph.prototype.defaultGraphics = function() {
-      var graphics;
-      graphics = Viva.Graph.View.svgGraphics();
-      graphics.node(function(node) {
-        var img, svgText, ui;
-        ui = Viva.Graph.svg('g');
-        svgText = Viva.Graph.svg('text').attr('font-size', "18px").attr('text-anchor', 'middle').attr('y', -17.).text(node.id);
-        img = Viva.Graph.svg('circle').attr('r', node.data.size).attr('fill', node.data.fillColor).attr('stroke', '#000');
-        ui.append(img);
-        ui.append(svgText);
-        return ui;
-      }).placeNode(function(nodeUI, pos) {
-        return nodeUI.attr('transform', 'translate(' + pos.x + ',' + pos.y + ')');
-      });
-      return graphics;
-    };
+    Graph.prototype.defaultGraphics = function() {};
 
-    Graph.prototype.defaultLayout = function() {
-      var layout;
-      layout = Viva.Graph.Layout.forceDirected(this.graph, {
-        springTransform: function(link, spring) {
-          if (link.data === 1) {
-            spring.coeff = 0.00003;
-            spring.length = 350;
-            spring.weight = 2;
-          } else if (link.data === 2) {
-            spring.length = 300;
-            spring.coeff = 0.0003;
-          }
-          return {
-            gravity: -10
-          };
-        }
-      });
-      return layout;
-    };
+    Graph.prototype.defaultLayout = function() {};
 
     Graph.prototype.updateGraph = function() {};
 
@@ -126,23 +95,21 @@
     function EmployeeGraph() {
       this.addNode = __bind(this.addNode, this);
       this.updateGraph = __bind(this.updateGraph, this);
-      var renderer, svgElement;
+      var graphElement;
       EmployeeGraph.__super__.constructor.apply(this, arguments);
-      renderer = Viva.Graph.View.renderer(this.graph, {
-        container: document.getElementById(this.options.container),
-        graphics: this.graphParameters.graphics,
-        layout: this.graphParameters.layout,
-        prerender: true
-      });
-      svgElement = this.graphParameters.graphics.getSvgRoot();
-      svgElement.attr('class', 'employee_visualization');
-      $(svgElement).bind('mousewheel DOMMouseScroll', function(e) {
-        if (e.shiftKey !== true) {
-          e.preventDefault();
-          return false;
-        }
-      });
-      renderer.run();
+      graphElement = this.graphParameters.graphics.domContainer;
+      $(graphElement).attr('class', 'employee_visualization');
+      $(graphElement).detach();
+      $('#demo').append(graphElement);
+
+      /*
+      $(graphElement).bind( 'mousewheel DOMMouseScroll', (e) ->
+        if e.shiftKey isnt true
+          e.preventDefault()
+          return false
+      )
+       */
+      this.graphParameters.graphics.run();
     }
 
     EmployeeGraph.prototype.updateGraph = function(members) {
@@ -163,7 +130,7 @@
       _results = [];
       for (_j = 0, _len1 = members.length; _j < _len1; _j++) {
         member = members[_j];
-        this.addNode(member, "user");
+        this.addNode(member.name, "user");
         _results.push((function() {
           var _k, _len2, _ref, _results1;
           _ref = member.workInfo;
@@ -173,14 +140,14 @@
             if (workInfo.location.indexOf("School") > -1) {
               if (member.workInfo.length === 1) {
                 if (this.graph.getNode(workInfo.location) === void 0) {
-                  this.addNode(workInfo, "school");
+                  this.addNode(workInfo.location, "school");
                 }
                 _results1.push(this.graph.addLink(member.name, workInfo.location, 1));
               } else {
                 _results1.push(void 0);
               }
             } else {
-              this.addNode(workInfo, "department");
+              this.addNode(workInfo.location, "department");
               this.graph.addLink(member.name, workInfo.location, 1);
               _results1.push((function() {
                 var _ref1, _results2;
@@ -196,9 +163,7 @@
                       department = _ref2[_l];
                       if (department === workInfo.location) {
                         if (this.graph.getNode(school) === void 0) {
-                          this.addNode({
-                            location: school
-                          }, "school");
+                          this.addNode(school, "school");
                         }
                         _results3.push(this.graph.addLink(workInfo.location, school, 2));
                       } else {
@@ -218,23 +183,10 @@
       return _results;
     };
 
-    EmployeeGraph.prototype.addNode = function(nodeData, type) {
-      if (type === "user") {
-        return this.graph.addNode(nodeData.name, {
-          fillColor: "black",
-          size: "12"
-        });
-      } else if (type === "department") {
-        return this.graph.addNode(nodeData.location, {
-          fillColor: "blue",
-          size: "14"
-        });
-      } else if (type === "school") {
-        return this.graph.addNode(nodeData.location, {
-          fillColor: "green",
-          size: "18"
-        });
-      }
+    EmployeeGraph.prototype.addNode = function(nodeID, type) {
+      this.graph.addNode(nodeID, {
+        type: type
+      });
     };
 
     return EmployeeGraph;
@@ -245,15 +197,7 @@
     __extends(LocationGraph, _super);
 
     function LocationGraph() {
-      var renderer;
       LocationGraph.__super__.constructor.apply(this, arguments);
-      renderer = Viva.Graph.View.renderer(this.graph, {
-        container: document.getElementById(this.options.container),
-        graphics: this.graphParameters.graphics,
-        layout: this.graphParameters.layout,
-        prerender: true
-      });
-      renderer.run();
     }
 
     return LocationGraph;
@@ -264,15 +208,7 @@
     __extends(PositionGraph, _super);
 
     function PositionGraph() {
-      var renderer;
       PositionGraph.__super__.constructor.apply(this, arguments);
-      renderer = Viva.Graph.View.renderer(this.graph, {
-        container: document.getElementById(this.options.container),
-        graphics: this.graphParameters.graphics,
-        layout: this.graphParameters.layout,
-        prerender: true
-      });
-      renderer.run();
     }
 
     return PositionGraph;

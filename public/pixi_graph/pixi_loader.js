@@ -1,8 +1,16 @@
-module.exports.main = function () {
-  graph = require('ngraph.generators').balancedBinTree(6);
+module.exports.start = function () {
+  var graph = require('ngraph.graph')();
   var createPixiGraphics = require('ngraph.pixi');
 
-  var pixiGraphics = createPixiGraphics(graph);
+  var pixiGraphics = createPixiGraphics(graph,
+      {
+        physics: {
+          springLength: 300,
+          springCoeff: 0.0003,
+          dragCoeff: 0.01,
+          gravity: -1.2
+  }
+      });
 
   // setup our custom looking nodes and links:
   pixiGraphics.createNodeUI(require('./lib/createNodeUI'))
@@ -10,6 +18,10 @@ module.exports.main = function () {
     .createLinkUI(require('./lib/createLinkUI'))
     .renderLink(require('./lib/renderLink'));
 
-  // begin animation loop:
-  pixiGraphics.run();
+
+
+  return {
+    graph    : graph,
+    graphics : pixiGraphics
+  }
 }

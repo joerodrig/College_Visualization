@@ -1,24 +1,25 @@
 module.exports = function (node) {
-  return new AnimatedNode();
+  return new AnimatedNode(node);
 }
 
 var colorLookup = [0x00FFFF, 0xFF5552];
 
-function AnimatedNode() {
-  this.color = colorLookup[(Math.random() * colorLookup.length)|0];
-  this.frame = Math.random();
-  this.width = Math.random() * 5 + 5;
-  this.v = 1 - Math.random() * 0.01;
-}
+function AnimatedNode(node) {
 
-AnimatedNode.prototype.renderFrame = function() {
-  if (this.frame < 0.6) {
-    this.frame = 1;
-    this.color = colorLookup[(Math.random() * colorLookup.length)|0];
-    this.width = Math.random() * 5 + 5;
-    this.v = 0.99999 - Math.random() * 0.01;
+  var type = node.data.type;
+  if (type === "user"){
+    this.color = "0xFFFFFF";
+    this.width = 5;
+  }
+  else if (type === "department"){
+    this.color = "0x1E703B";
+    this.width = 10;
+  }
+  else if (type === "school"){
+    this.color = "0x1E4F70";
+    this.width = 15;
   }
 
-  this.frame *= this.v;
-  this.width *= this.v;
 }
+
+
