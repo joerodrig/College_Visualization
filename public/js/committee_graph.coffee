@@ -32,24 +32,6 @@ class Graph
     @graphParameters.graphics.run()
     return
 
-
-  defaultGraphics: () =>
-
-
-  defaultLayout: () =>
-
-  #Updates graph
-  updateGraph: () =>
-
-  #Adds a node to the graph
-  addNode: ()  =>
-
-  #Adds a link to the graph
-  addLink: () =>
-
-  randomNum: () ->
-    return Math.floor(Math.random() * max)
-
 ###
   Displays all Ithaca College employees that are in a specific committee based off of the
   parameters
@@ -60,18 +42,7 @@ class EmployeeGraph extends Graph
     graphElement = @graphParameters.graphics.domContainer
     $(graphElement).attr('class','employee_visualization')
     $(graphElement).detach()
-    $('#demo').append(graphElement);
-
-    ###
-    $(graphElement).bind( 'mousewheel DOMMouseScroll', (e) ->
-      if e.shiftKey isnt true
-        e.preventDefault()
-        return false
-    )
-###
-
-
-
+    $('#demo').append(graphElement)
     @graphParameters.graphics.run()
 
   updateGraph: (members) =>
@@ -104,18 +75,11 @@ class EmployeeGraph extends Graph
 
     #TODO: Add more user details to addnode. Also possibly add more details to locations
 
-
-
   addNode: (nodeID,type)=>
-
     @graph.addNode(nodeID,
-     type:type
+     type : type
     )
-
     return
-
-
-
 
 class LocationGraph extends Graph
   constructor:() ->
@@ -124,6 +88,9 @@ class LocationGraph extends Graph
 class PositionGraph extends Graph
   constructor:() ->
     super
+
+
+
 
 exports = this
 exports.CommitteeGraph = new CommitteeGraph()

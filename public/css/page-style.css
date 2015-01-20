@@ -32,6 +32,7 @@ body {
     padding-right: 0;
     padding-left:0;
     overflow-y:scroll;
+
 }
 
 .committee{
@@ -52,6 +53,7 @@ body {
     height: 100%;
     padding-left: 0;
     padding-right: 0;
+    overflow:hidden;
 }
 
 
@@ -97,12 +99,6 @@ body {
     font-size:12px;
 }
 
-
-svg {
-    height: 100%;
-    width: 100%;
-    background-color: white;
-}
 
 g {
     cursor:pointer;

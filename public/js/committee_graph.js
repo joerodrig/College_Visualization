@@ -50,11 +50,6 @@
       var createdGraph;
       this.schools = schools;
       this.options = options;
-      this.addLink = __bind(this.addLink, this);
-      this.addNode = __bind(this.addNode, this);
-      this.updateGraph = __bind(this.updateGraph, this);
-      this.defaultLayout = __bind(this.defaultLayout, this);
-      this.defaultGraphics = __bind(this.defaultGraphics, this);
       createdGraph = new ngraph.start();
       this.activeFilters = [];
       this.graph = createdGraph.graph;
@@ -64,20 +59,6 @@
       this.graphParameters.graphics.run();
       return;
     }
-
-    Graph.prototype.defaultGraphics = function() {};
-
-    Graph.prototype.defaultLayout = function() {};
-
-    Graph.prototype.updateGraph = function() {};
-
-    Graph.prototype.addNode = function() {};
-
-    Graph.prototype.addLink = function() {};
-
-    Graph.prototype.randomNum = function() {
-      return Math.floor(Math.random() * max);
-    };
 
     return Graph;
 
@@ -101,14 +82,6 @@
       $(graphElement).attr('class', 'employee_visualization');
       $(graphElement).detach();
       $('#demo').append(graphElement);
-
-      /*
-      $(graphElement).bind( 'mousewheel DOMMouseScroll', (e) ->
-        if e.shiftKey isnt true
-          e.preventDefault()
-          return false
-      )
-       */
       this.graphParameters.graphics.run();
     }
 

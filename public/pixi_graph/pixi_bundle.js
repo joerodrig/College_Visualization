@@ -2,9 +2,8 @@
 module.exports = function (link) {
   return {
     width: 4,
-    color : "white"
+    color : "0x9BA4AA"
   }
-
 };
 
 },{}],2:[function(require,module,exports){
@@ -12,41 +11,37 @@ module.exports = function (node) {
   return new AnimatedNode(node);
 }
 
-var colorLookup = [0x00FFFF, 0xFF5552];
-
 function AnimatedNode(node) {
-
   var type = node.data.type;
   if (type === "user"){
-    this.color = "0xFFFFFF";
-    this.width = 5;
+    this.color = "0x10100F";
+    this.width = 8;
+
   }
   else if (type === "department"){
     this.color = "0x1E703B";
-    this.width = 10;
-  }
-  else if (type === "school"){
-    this.color = "0x1E4F70";
     this.width = 15;
   }
-
+  else if (type === "school"){
+    this.color = "0x297DB5";
+    this.width = 25;
+  }
 }
 
 
 
 },{}],3:[function(require,module,exports){
 module.exports = function (link, ctx) {
-  ctx.lineStyle(link.width, 0x333333, 1);
+  ctx.lineStyle(link.width, link.color,1);
   ctx.moveTo(link.from.x, link.from.y);
   ctx.lineTo(link.to.x, link.to.y);
 }
 
 },{}],4:[function(require,module,exports){
 module.exports = function (nodeProperties, ctx) {
-  //nodeProperties.renderFrame();
-  ctx.lineStyle(0);
-  ctx.beginFill(nodeProperties.color,1);
-  ctx.drawCircle(nodeProperties.pos.x, nodeProperties.pos.y, nodeProperties.width);
+    ctx.lineStyle(0);
+    ctx.beginFill(nodeProperties.color,1);
+    ctx.drawCircle(nodeProperties.pos.x, nodeProperties.pos.y, nodeProperties.width);
 }
 
 },{}],5:[function(require,module,exports){
@@ -2341,6 +2336,8 @@ module.exports = function Node() {
 module.exports=require(12)
 },{}],25:[function(require,module,exports){
 module.exports.start = function () {
+
+// create an new instance of a pixi stage
   var graph = require('ngraph.graph')();
   var createPixiGraphics = require('ngraph.pixi');
 
@@ -2351,14 +2348,20 @@ module.exports.start = function () {
           springCoeff: 0.0003,
           dragCoeff: 0.01,
           gravity: -1.2
-  }
+        }
       });
 
   // setup our custom looking nodes and links:
   pixiGraphics.createNodeUI(require('./lib/createNodeUI'))
-    .renderNode(require('./lib/renderNode'))
-    .createLinkUI(require('./lib/createLinkUI'))
-    .renderLink(require('./lib/renderLink'));
+      .renderNode(require('./lib/renderNode'))
+      .createLinkUI(require('./lib/createLinkUI'))
+      .renderLink(require('./lib/renderLink'))
+      .stage.setBackgroundColor("0xFFFFFF");
+
+ // var background =  PIXI.Sprite.fromImage("../img/noisy_texture.png");
+  //pixiGraphics.stage.addChild(background);
+
+
 
 
 

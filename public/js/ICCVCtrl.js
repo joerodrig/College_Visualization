@@ -12,14 +12,14 @@ var ICCVApp = angular.module('ICCV', ['extra_information']);
 
 ICCVApp.controller('ICCVCtrl', ['$scope', '$http', function ($scope, $http) {
     $scope.activeGroupName;
-    $scope.showExtraInfo    = true;
+    $scope.showExtraInfo    = false;
     $scope.positionCount    = [];
     $scope.departmentCount  = [];
     $scope.committees = [
         {
             id: "C1",
             committee_name: "Committee One",
-            people: ["cmckenzie", "jives", "ebleicher", "chaltom"]
+            people: ["cmckenzie"]
         },
         {
             id: "C3",
