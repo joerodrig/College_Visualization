@@ -53,7 +53,7 @@ ICCVApp.directive('graph', function ($http, $q) {
     function linker(scope, element, attrs) {
         //Initialize graph(s) once required information has successfully loaded
         $q.all([scope.workInfo,scope.schools]).then(function () {
-            console.log("Handling Information");
+            console.log("graph dependencies loaded");
             var options = {container: attrs.container},
                 loadedData = {workInfo: scope.workInfo, schoolLinker: scope.schools};
             scope.g = new CommitteeGraph.initialize(element[0], loadedData, options);

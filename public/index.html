@@ -7,12 +7,13 @@
     <link rel="stylesheet" href="css/page-style.css"/>
     <style type="text/css" media="screen">
     </style>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.8/angular.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.8/angular.min.js"></script>
 </head>
 <body ng-controller="ICCVCtrl">
 <div style="height:100%;">
     <!-- Committees -->
-    <div  class="col-sm-2 committee_sidebar">
+    <div class="col-sm-2 committee_sidebar">
         <nav class="navbar" role="navigation">
             <ul class="nav nav-pills nav-stacked">
                 <li ng-cloak ng-show="committees"
@@ -33,16 +34,15 @@
 
     </div>
     <!-- Graph -->
-    <graph id="graph_location" data-initialGraph="employee" data-container="demo"  class="col-xs-12 col-sm-10"></graph>
+    <graph id="graph_location" data-initialGraph="employee" data-container="demo" class="col-xs-12 col-sm-10"></graph>
 </div>
 
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
 <!-- Loading Angular App Controller -->
 <script type="text/javascript" src="js/ICCVCtrl.js"></script>
-<!-- Loading Pixi Graph -->
-<script type="text/javascript" src="/pixi_graph/pixi/pixi.dev.js"></script>
-<script type="text/javascript" src="/pixi_graph/pixi_bundle.js"></script>
+<!-- Loading Compiled ngraph -->
+<script type="text/javascript" src="/ngraph_svg/ngraph_bundle.js"></script>
 
 <!-- Loading Bootstrap JS Dependencies -->
 <script type="text/javascript" src="js/bootstrap.min.js"></script>

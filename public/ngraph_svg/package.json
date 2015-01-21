@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "start": "node_modules/.bin/browserify -s ngraph ngraph_loader.js > ngraph_bundle.js"
+  },
+  "dependencies": {
+    "ngraph.graph": "0.0.6",
+    "ngraph.svg"  : "0.0.7",
+    "simplesvg": "0.0.8"
+  },
+  "devDependencies": {
+    "browserify": "8.1.1"
+  }
+}
