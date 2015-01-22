@@ -22,13 +22,6 @@
                     ng-repeat="(key,obj) in committees"
                     ng-click="committeeClicked(obj)">{{obj.committee_name}}
                 </li>
-
-                <li ng-cloak ng-show="committees"
-                    class="text-center committee noselect"
-                    ng-class="{'school_active':key == activeGroupName}"
-                    ng-repeat="(key,obj) in schools"
-                    ng-click="schoolClicked(key,obj)">{{key}}
-                </li>
             </ul>
         </nav>
 

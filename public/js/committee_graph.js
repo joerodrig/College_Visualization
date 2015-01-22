@@ -3,8 +3,7 @@
   var CommitteeGraph, Controller, EmployeeGraph, Graph, cGraph, exports,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   CommitteeGraph = (function() {
     function CommitteeGraph() {}
@@ -29,12 +28,16 @@
 
   Controller = (function() {
     function Controller(data, options) {
-      var employeeGraph;
-      employeeGraph = new EmployeeGraph(data.schoolLinker, options);
+      var clickListeners, employeeGraph;
+      clickListeners = {
+        schoolClicked: data.schoolClicked,
+        departmentClicked: data.departmentClicked
+      };
+      employeeGraph = new EmployeeGraph(data.schoolLinker, clickListeners, options);
       return {
         updateGraph: (function(_this) {
-          return function(members) {
-            return employeeGraph.updateGraph(members);
+          return function(nodes, adding) {
+            return employeeGraph.updateGraph(nodes, adding);
           };
         })(this)
       };
@@ -45,9 +48,10 @@
   })();
 
   Graph = (function() {
-    function Graph(schools, options) {
+    function Graph(schools, clickListeners, options) {
       var createdGraph;
       this.schools = schools;
+      this.clickListeners = clickListeners;
       this.options = options;
       createdGraph = new ngraph.start();
       this.activeFilters = [];
@@ -61,18 +65,27 @@
           var circ, svg, txt, ui;
           svg = _this.graphParameters.svg;
           ui = svg('g');
-          circ = svg("circle").attr('fill', node.data.fill).attr('r', node.data.size);
-          txt = svg('text').attr('font-size', "18px").attr('text-anchor', 'middle').attr('y', -17.);
+          circ = svg("circle").attr('fill', node.data.fill).attr('r', node.data.size).attr('class', node.data.type);
+          txt = svg('text').attr('font-size', "18px").attr('text-anchor', 'middle').attr('y', parseInt("-" + node.data.size + (-17)));
           txt.textContent = node.id;
           ui.append(circ);
           ui.append(txt);
+          if (node.data.type === "school_node") {
+            $(circ).click(function() {
+              return _this.clickListeners.schoolClicked(node.id);
+            });
+          } else if (node.data.type === "department_node") {
+            $(circ).click(function() {
+              return _this.clickListeners.departmentClicked(node.id);
+            });
+          }
           return ui;
         };
       })(this)).placeNode(function(nodeUI, pos) {
         return nodeUI.attr('transform', 'translate(' + pos.x + ',' + pos.y + ')');
       });
       return;
-      this.graphParameters.renderer.layout.simulator.gravity(-5);
+      this.graphParameters.renderer.layout.simulator.gravity(-15);
       this.graphParameters.renderer.link((function(_this) {
         return function(link) {
           return _this.graphParameters.svg("line").attr("stroke", "#FFF");
@@ -108,6 +121,7 @@
     function EmployeeGraph() {
       this.addNode = __bind(this.addNode, this);
       this.updateGraph = __bind(this.updateGraph, this);
+      this.initial = __bind(this.initial, this);
       var graphElement;
       EmployeeGraph.__super__.constructor.apply(this, arguments);
       graphElement = this.graphParameters.renderer.svgRoot;
@@ -115,94 +129,92 @@
       $(graphElement).detach();
       $('#demo').append(graphElement);
       this.graphParameters.renderer.run();
+      this.initial();
     }
 
-    EmployeeGraph.prototype.updateGraph = function(members) {
-      var department, member, memberNames, school, vals, workInfo, _i, _j, _len, _len1, _results;
-      memberNames = [];
-      for (_i = 0, _len = members.length; _i < _len; _i++) {
-        member = members[_i];
-        memberNames.push(member.name);
-      }
-      this.graph.forEachNode((function(_this) {
-        return function(node) {
-          var _ref;
-          if ((_ref = node.id, __indexOf.call(memberNames, _ref) < 0)) {
-            _this.graph.removeNode(node.id);
-          }
-        };
-      })(this));
+    EmployeeGraph.prototype.initial = function() {
+      var school, _results;
+      this.graphParameters.renderer.layout.pinNode(this.addNode("IC", "main"), true);
       _results = [];
-      for (_j = 0, _len1 = members.length; _j < _len1; _j++) {
-        member = members[_j];
-        this.addNode(member.name, "un");
-        _results.push((function() {
-          var _k, _len2, _ref, _results1;
-          _ref = member.workInfo;
-          _results1 = [];
-          for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
-            workInfo = _ref[_k];
-            if (workInfo.location.indexOf("School") > -1) {
-              if (member.workInfo.length === 1) {
-                if (this.graph.getNode(workInfo.location) === void 0) {
-                  this.addNode(workInfo.location, "sn");
-                }
-                _results1.push(this.graph.addLink(member.name, workInfo.location, 1));
-              } else {
-                _results1.push(void 0);
+      for (school in this.schools) {
+        this.addNode(school, "sn");
+        _results.push(this.graph.addLink(school, "IC"));
+      }
+      return _results;
+    };
+
+    EmployeeGraph.prototype.updateGraph = function(nodes, adding) {
+      var node, otherNode, strength, toLink, type, work, _i, _j, _len, _len1, _ref, _results;
+      toLink = [];
+      _results = [];
+      for (_i = 0, _len = nodes.length; _i < _len; _i++) {
+        node = nodes[_i];
+        node.toLink = [];
+        if (node.type === "department") {
+          type = "dn";
+          strength = 2;
+          node.toLink.push(node.school);
+        } else if (node.type === "user") {
+          type = "un";
+          strength = 1;
+          _ref = node.workInfo;
+          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+            work = _ref[_j];
+            if (this.graph.getNode(work.location) === void 0) {
+              this.addNode(work.location, "dn");
+            }
+            if (work.location.indexOf("School") !== -1) {
+              if (node.workInfo.length === 1 || work.location.indexOf("Dean") !== -1) {
+                node.toLink.push(work.location);
               }
             } else {
-              this.addNode(workInfo.location, "dn");
-              this.graph.addLink(member.name, workInfo.location, 1);
-              _results1.push((function() {
-                var _ref1, _results2;
-                _ref1 = this.schools;
-                _results2 = [];
-                for (school in _ref1) {
-                  vals = _ref1[school];
-                  _results2.push((function() {
-                    var _l, _len3, _ref2, _results3;
-                    _ref2 = this.schools[school].departments;
-                    _results3 = [];
-                    for (_l = 0, _len3 = _ref2.length; _l < _len3; _l++) {
-                      department = _ref2[_l];
-                      if (department === workInfo.location) {
-                        if (this.graph.getNode(school) === void 0) {
-                          this.addNode(school, "sn");
-                        }
-                        _results3.push(this.graph.addLink(workInfo.location, school, 2));
-                      } else {
-                        _results3.push(void 0);
-                      }
-                    }
-                    return _results3;
-                  }).call(this));
-                }
-                return _results2;
-              }).call(this));
+              node.toLink.push(work.location);
             }
           }
-          return _results1;
-        }).call(this));
+        }
+        if (adding) {
+          this.addNode(node.id, type);
+          _results.push((function() {
+            var _k, _len2, _ref1, _results1;
+            _ref1 = node.toLink;
+            _results1 = [];
+            for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
+              otherNode = _ref1[_k];
+              _results1.push(this.graph.addLink(node.id, otherNode, strength));
+            }
+            return _results1;
+          }).call(this));
+        } else {
+          _results.push(this.graph.removeNode(node.id));
+        }
       }
       return _results;
     };
 
     EmployeeGraph.prototype.addNode = function(nodeID, type) {
       if (type === "un") {
-        this.graph.addNode(nodeID, {
+        return this.graph.addNode(nodeID, {
           fill: "#000",
-          size: "12"
+          size: "12",
+          type: "user_node"
         });
       } else if (type === "dn") {
-        this.graph.addNode(nodeID, {
+        return this.graph.addNode(nodeID, {
           fill: "#FFF",
-          size: "14"
+          size: "14",
+          type: "department_node"
         });
       } else if (type === "sn") {
-        this.graph.addNode(nodeID, {
+        return this.graph.addNode(nodeID, {
           fill: "#a3ff00",
-          size: "18"
+          size: "18",
+          type: "school_node"
+        });
+      } else if (type === "main") {
+        return this.graph.addNode(nodeID, {
+          fill: "blue",
+          size: "22",
+          type: "main_node"
         });
       }
     };
