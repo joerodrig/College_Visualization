@@ -15,7 +15,7 @@ class Controller
       schoolClicked     : data.schoolClicked
       departmentClicked : data.departmentClicked
 
-    employeeGraph = new EmployeeGraph(data.schoolLinker,clickListeners,options)
+    employeeGraph = new EmployeeGraph(data,clickListeners,options)
     return {
       updateGraph: (nodes,adding) =>
         employeeGraph.updateGraph(nodes,adding)
@@ -23,71 +23,14 @@ class Controller
 
 
 class Graph
-  constructor: (@schools,@clickListeners,@options) ->
-    createdGraph     = new ngraph.start()
+  constructor: (@schoolInfo,listeners,@options) ->
+    createdGraph     = new ngraph.start(listeners)
     @activeFilters   = []
     @graph           = createdGraph.graph
     @graphParameters =  {
       renderer: createdGraph.renderer
       svg     : createdGraph.svg
     }
-
-
-    @graphParameters.renderer.node((node) =>
-      svg = @graphParameters.svg
-      ui = svg('g')
-
-      circ = svg("circle")
-      .attr('fill',node.data.fill)
-      .attr('r',node.data.size)
-      .attr('class',node.data.type)
-
-      txt = svg('text').
-      attr('font-size', "18px").
-      attr('text-anchor','middle').
-      attr('y',parseInt("-"+node.data.size + (-17)))
-      txt.textContent = node.id
-
-      ui.append(circ)
-      ui.append(txt)
-
-      if node.data.type is "school_node"
-        $(circ).click(() =>
-          @clickListeners.schoolClicked(node.id)
-        )
-      else if node.data.type is "department_node"
-        $(circ).click(() =>
-          @clickListeners.departmentClicked(node.id)
-        )
-
-
-
-      return ui
-    )
-    .placeNode((nodeUI, pos) ->
-      nodeUI.attr('transform', 'translate(' + (pos.x) + ',' + (pos.y) + ')')
-    )
-    return
-
-    @graphParameters.renderer.layout.simulator.gravity(-15)
-
-    @graphParameters.renderer.link((link) =>
-      return @graphParameters.svg("line").
-      attr("stroke","#FFF")
-    )
-
-    ###
-      springTransform:  (link, spring) ->
-        if link.data is 1
-          spring.coeff = 0.00003
-          spring.length = 350
-          spring.weight = 2
-        else if link.data is 2
-          spring.length = 300
-          spring.coeff = 0.0003
-    ###
-
-
     return
 
 ###
@@ -104,68 +47,106 @@ class EmployeeGraph extends Graph
     @graphParameters.renderer.run()
     @initial()
 
-  initial: () =>
+    console.log(@graph)
+    console.log @graphParameters
 
-    @graphParameters.renderer.layout.pinNode(@addNode("IC","main"),true)
-    for school of @schools
-      @addNode(school,"sn")
-      @graph.addLink(school,"IC")
+
+  initial: () =>
+    nodePosition = @graphParameters.renderer.layout.getNodePosition
+    mainNode = {id:"IC",type:"main"}
+    @graphParameters.renderer.layout.pinNode(@addNode(mainNode),true)
+    for school in @schoolInfo.schools
+      schoolNode = {id:school.name,type:school.type}
+      @graph.addLink(@addNode(schoolNode).id,mainNode.id)
+
+
 
   updateGraph: (nodes,adding) =>
-    toLink = []
     for node in nodes
-      node.toLink = []
-      if node.type is "department"
-        type      = "dn"
-        strength  = 2
-        node.toLink.push( node.school )
-      else if node.type is "user"
-        type      = "un"
-        strength  = 1
-        for work in node.workInfo
-          if @graph.getNode(work.location) is undefined
-            @addNode(work.location,"dn")
-          if work.location.indexOf("School") isnt -1 #If a school
-            if node.workInfo.length == 1 || work.location.indexOf("Dean") isnt -1
-              #Add a link if the person is some sort of dean, or if that is the only link
-              node.toLink.push(work.location)
-          else
-            node.toLink.push(work.location)
-
       if adding
-        @addNode(node.id,type)
-        for otherNode in node.toLink
-          @graph.addLink(node.id,otherNode,strength)
-      else
-        #TODO: Need to implement a lot of checks here
-        @graph.removeNode(node.id)
+        @addNode(node)
+      if node.type is "school"
+        @toggleLinks(node,adding)
+        ###
+        if node.type is "user"
+          for work in node.workInfo
+            hasNode = @graph.getNode(work.location)
+            #Checking to see if department or school
+            if hasNode is undefined
+              associatedSchool = @returnSchool(work.location)
+              if @graph.hasLink(work.location,associatedSchool) is null
+                @addLink(@addNode(work.location,"dn"), @linkSchool(work.location),1)
+            else if hasNode
+              if work.location.indexOf("School") isnt -1
+                #Add a link to the school if user position is dean, or if that is the only link
+                if node.workInfo.length == 1 || work.location.indexOf("Dean") isnt -1
+                  @addLink(node.id,work.location,2)
+              else
+                @addLink(node.id,work.location)
+        ###
 
 
-  addNode: (nodeID,type)=>
-    if type is "un"
-      @graph.addNode(nodeID,
-        fill: "#000"
-        size: "12"
-        type:"user_node"
-      )
-    else if type is "dn"
-      @graph.addNode(nodeID,
-        fill: "#FFF"
-        size:"14"
-        type:"department_node"
-      )
-    else if type is "sn"
-      @graph.addNode(nodeID,
-        fill: "#a3ff00"
-        size:"18"
-        type:"school_node"
-      )
-    else if type is "main"
-      @graph.addNode(nodeID,
-      fill: "blue"
-      size:"22"
-      type:"main_node"
-      )
+
+
+  addLink: (from,to,strength) =>
+    @graph.addLink(from,to,strength)
+
+
+  rmvLink: (link) =>
+    console.log(@graph.removeLink(link))
+
+
+  addNode: (node)=>
+    if @graph.getNode(node.id) is undefined
+      if node.type is "user"
+        @graph.addNode(node,
+          fill: "#000"
+          size: "12"
+          type:"user_node"
+        )
+      else if node.type is "department"
+        @graph.addNode(node.id,
+          fill: "#AAA"
+          size:"14"
+          type:"department_node"
+        )
+
+      else if node.type is "school"
+        @graph.addNode(node.id,
+          fill: "#a3ff00"
+          size:"18"
+          type:"school_node")
+
+      else if node.type is "main"
+        @graph.addNode(node.id,
+        fill: "blue"
+        size:"22"
+        type:"main_node"
+        )
+
+
+  rmvNode:(node)=>
+    #if node.type is "department"
+      #Go through each person connected to department
+        #If person is connected to another department
+          #If that department is not connected to anything else, delete it
+        #Else remove person
+
+        #Remove each department
+
+
+
+  toggleLinks:(node,adding)=>
+    if node.type is "school"
+      for department in node.associatedDepartments
+        if adding
+          @addLink(node.id,@addNode(department).id,2)
+        else
+          @graph.removeLink(@graph.hasLink(node.id,department.id))
+          @graph.removeNode(department.id)
+
+    @rmvNode(node)
+
 
 
 exports = this

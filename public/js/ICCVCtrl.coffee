@@ -73,10 +73,25 @@ ICCVApp.directive "graph", ($http, $q) ->
       scope.schools
     ]).then ->
       console.log "Graph Dependencies Loaded"
+      dep2SchoolMap = () =>
+        linkedMap = {}
+        for school,schoolInfo of scope.schools
+          for department in schoolInfo.departments
+            linkedMap[department] = school
+        return linkedMap
+      schools = () =>
+        schoolHolder = []
+        for school,schoolInfo of scope.schools
+          schoolHolder.push(name:school,short_name:schoolInfo.short_name,type:"school")
+
+
+        return schoolHolder
+
       options = container: attrs.container
       loadedData =
         workInfo         : scope.workInfo
-        schoolLinker     : scope.schools
+        schools          : schools()
+        schoolLinker     : dep2SchoolMap()
         schoolClicked    : scope.schoolClicked
         departmentClicked: scope.departmentClicked
 
@@ -103,34 +118,42 @@ ICCVApp.directive "graph", ($http, $q) ->
       return
 
     scope.schoolClicked = (school) ->
-      console.log "School clicked"
-      deps = []
-      $.each(scope.schools[school].departments, (index, department) ->
-        deps.push(id: department, type:"department",school:school)
-      )
+      associatedDepartments = []
       if school in scope.activeSchools
         scope.activeSchools.splice(scope.activeSchools.indexOf(school),1)
+        #Need to deactivate all departments in this school as well
+        for department in scope.schools[school].departments
+          if scope.activeDepartments.indexOf(department) isnt -1
+            scope.departmentClicked(department.id)
         addDepartments = false
       else
         scope.activeSchools.push(school)
         addDepartments = true
 
+      for department in scope.schools[school].departments
+        associatedDepartments.push({id:department,type:"department"})
 
-      scope.updateGraph(deps,addDepartments)
+      selectedSchool =[
+        id:school,type:"school",
+        short_name:scope.schools[school],
+        associatedDepartments:associatedDepartments
+        ]
+      scope.updateGraph(selectedSchool,addDepartments)
+
 
     #scope.updateCounts(membersInfo);
 
 
     scope.departmentClicked = (department) ->
-      console.log "Department Clicked"
       people = []
-      $.each(scope.workInfo, (person, info) ->
-        workInfo = info
-        for key,work of info
+      for person,userWorkInfo of scope.workInfo
+        for key,work of userWorkInfo
           if work.location is department
-            people.push(id: person, type:"user",workInfo: workInfo)
-            return
-      )
+            people.push(id: person, type:"user",workInfo: userWorkInfo,associatedDepartment : department)
+          #else
+            #Check to see what other departments a user is linked to
+              #If user is linked to another department/school, we have to activate that school and the connected department
+
 
       addPeople = department in scope.activeDepartments
       if addPeople

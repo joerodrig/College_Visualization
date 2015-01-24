@@ -5,7 +5,9 @@
   "dependencies": {
     "ngraph.graph": "0.0.6",
     "ngraph.svg"  : "0.0.7",
-    "simplesvg": "0.0.8"
+    "simplesvg": "0.0.8",
+    "ngraph.forcelayout": "0.0.12"
+
   },
   "devDependencies": {
     "browserify": "8.1.1"

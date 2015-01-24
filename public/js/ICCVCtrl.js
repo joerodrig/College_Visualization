@@ -58,14 +58,47 @@
     linker = function(scope, element, attrs) {
       var TEI, updateCounts;
       $q.all([scope.workInfo, scope.schools]).then(function() {
-        var loadedData, options;
+        var dep2SchoolMap, loadedData, options, schools;
         console.log("Graph Dependencies Loaded");
+        dep2SchoolMap = (function(_this) {
+          return function() {
+            var department, linkedMap, school, schoolInfo, _i, _len, _ref, _ref1;
+            linkedMap = {};
+            _ref = scope.schools;
+            for (school in _ref) {
+              schoolInfo = _ref[school];
+              _ref1 = schoolInfo.departments;
+              for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+                department = _ref1[_i];
+                linkedMap[department] = school;
+              }
+            }
+            return linkedMap;
+          };
+        })(this);
+        schools = (function(_this) {
+          return function() {
+            var school, schoolHolder, schoolInfo, _ref;
+            schoolHolder = [];
+            _ref = scope.schools;
+            for (school in _ref) {
+              schoolInfo = _ref[school];
+              schoolHolder.push({
+                name: school,
+                short_name: schoolInfo.short_name,
+                type: "school"
+              });
+            }
+            return schoolHolder;
+          };
+        })(this);
         options = {
           container: attrs.container
         };
         loadedData = {
           workInfo: scope.workInfo,
-          schoolLinker: scope.schools,
+          schools: schools(),
+          schoolLinker: dep2SchoolMap(),
           schoolClicked: scope.schoolClicked,
           departmentClicked: scope.departmentClicked
         };
@@ -88,44 +121,58 @@
         scope.updateCounts(membersInfo);
       };
       scope.schoolClicked = function(school) {
-        var addDepartments, deps;
-        console.log("School clicked");
-        deps = [];
-        $.each(scope.schools[school].departments, function(index, department) {
-          return deps.push({
-            id: department,
-            type: "department",
-            school: school
-          });
-        });
+        var addDepartments, associatedDepartments, department, selectedSchool, _i, _j, _len, _len1, _ref, _ref1;
+        associatedDepartments = [];
         if (__indexOf.call(scope.activeSchools, school) >= 0) {
           scope.activeSchools.splice(scope.activeSchools.indexOf(school), 1);
+          _ref = scope.schools[school].departments;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            department = _ref[_i];
+            if (scope.activeDepartments.indexOf(department) !== -1) {
+              scope.departmentClicked(department.id);
+            }
+          }
           addDepartments = false;
         } else {
           scope.activeSchools.push(school);
           addDepartments = true;
         }
-        return scope.updateGraph(deps, addDepartments);
+        _ref1 = scope.schools[school].departments;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          department = _ref1[_j];
+          associatedDepartments.push({
+            id: department,
+            type: "department"
+          });
+        }
+        selectedSchool = [
+          {
+            id: school,
+            type: "school",
+            short_name: scope.schools[school],
+            associatedDepartments: associatedDepartments
+          }
+        ];
+        return scope.updateGraph(selectedSchool, addDepartments);
       };
       scope.departmentClicked = function(department) {
-        var addPeople, people;
-        console.log("Department Clicked");
+        var addPeople, key, people, person, userWorkInfo, work, _ref;
         people = [];
-        $.each(scope.workInfo, function(person, info) {
-          var key, work, workInfo;
-          workInfo = info;
-          for (key in info) {
-            work = info[key];
+        _ref = scope.workInfo;
+        for (person in _ref) {
+          userWorkInfo = _ref[person];
+          for (key in userWorkInfo) {
+            work = userWorkInfo[key];
             if (work.location === department) {
               people.push({
                 id: person,
                 type: "user",
-                workInfo: workInfo
+                workInfo: userWorkInfo,
+                associatedDepartment: department
               });
-              return;
             }
           }
-        });
+        }
         addPeople = __indexOf.call(scope.activeDepartments, department) >= 0;
         if (addPeople) {
           scope.activeDepartments.splice(scope.activeDepartments.indexOf(department), 1);
