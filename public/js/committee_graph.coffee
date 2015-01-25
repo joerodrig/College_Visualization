@@ -47,43 +47,56 @@ class EmployeeGraph extends Graph
     @graphParameters.renderer.run()
     @initial()
 
-    console.log(@graph)
-    console.log @graphParameters
 
 
   initial: () =>
-    nodePosition = @graphParameters.renderer.layout.getNodePosition
+    #nodePosition = @graphParameters.renderer.layout.getNodePosition
     mainNode = {id:"IC",type:"main"}
     @graphParameters.renderer.layout.pinNode(@addNode(mainNode),true)
-    for school in @schoolInfo.schools
-      schoolNode = {id:school.name,type:school.type}
-      @graph.addLink(@addNode(schoolNode).id,mainNode.id)
+    for school,properties of @schoolInfo.schools
+      schoolNode = {id:school,type:properties.type,size:properties.departments.length}
+      @addNode(schoolNode)
+      @graph.addLink(schoolNode.id,mainNode.id,schoolNode.size)
 
 
 
-  updateGraph: (nodes,adding) =>
-    for node in nodes
-      if adding
-        @addNode(node)
-      if node.type is "school"
-        @toggleLinks(node,adding)
-        ###
-        if node.type is "user"
-          for work in node.workInfo
-            hasNode = @graph.getNode(work.location)
-            #Checking to see if department or school
-            if hasNode is undefined
-              associatedSchool = @returnSchool(work.location)
-              if @graph.hasLink(work.location,associatedSchool) is null
-                @addLink(@addNode(work.location,"dn"), @linkSchool(work.location),1)
-            else if hasNode
-              if work.location.indexOf("School") isnt -1
-                #Add a link to the school if user position is dean, or if that is the only link
-                if node.workInfo.length == 1 || work.location.indexOf("Dean") isnt -1
-                  @addLink(node.id,work.location,2)
-              else
-                @addLink(node.id,work.location)
-        ###
+  updateGraph: (primaryNode,adding) =>
+
+    if primaryNode.type is "school"
+      for departmentName,properties of primaryNode.standardizedDepartments
+        if adding
+          @toggleLinks(primaryNode,properties,adding)
+
+    if primaryNode.type is "department"
+       for username,properties of primaryNode.standardizedUsers
+        if adding
+         @toggleLinks(primaryNode,properties,adding)
+
+
+
+
+      #@toggleLinks(node,adding)
+    #for node in nodes
+    #  if adding
+    #    @addNode(node)
+
+    ###
+    if node.type is "user"
+      for work in node.workInfo
+        hasNode = @graph.getNode(work.location)
+        #Checking to see if department or school
+        if hasNode is undefined
+          associatedSchool = @returnSchool(work.location)
+          if @graph.hasLink(work.location,associatedSchool) is null
+            @addLink(@addNode(work.location,"dn"), @linkSchool(work.location),1)
+        else if hasNode
+          if work.location.indexOf("School") isnt -1
+            #Add a link to the school if user position is dean, or if that is the only link
+            if node.workInfo.length == 1 || work.location.indexOf("Dean") isnt -1
+              @addLink(node.id,work.location,2)
+          else
+            @addLink(node.id,work.location)
+    ###
 
 
 
@@ -99,7 +112,7 @@ class EmployeeGraph extends Graph
   addNode: (node)=>
     if @graph.getNode(node.id) is undefined
       if node.type is "user"
-        @graph.addNode(node,
+        @graph.addNode(node.id,
           fill: "#000"
           size: "12"
           type:"user_node"
@@ -107,14 +120,19 @@ class EmployeeGraph extends Graph
       else if node.type is "department"
         @graph.addNode(node.id,
           fill: "#AAA"
-          size:"14"
-          type:"department_node"
+          size: node.size
+          type: "department_node"
         )
 
       else if node.type is "school"
+        if node.size < 10
+          node.size = 10
+        else if node.size > 25
+          node.size  = 25
+
         @graph.addNode(node.id,
           fill: "#a3ff00"
-          size:"18"
+          size: node.size*2
           type:"school_node")
 
       else if node.type is "main"
@@ -136,16 +154,18 @@ class EmployeeGraph extends Graph
 
 
 
-  toggleLinks:(node,adding)=>
-    if node.type is "school"
-      for department in node.associatedDepartments
-        if adding
-          @addLink(node.id,@addNode(department).id,2)
-        else
-          @graph.removeLink(@graph.hasLink(node.id,department.id))
-          @graph.removeNode(department.id)
+  toggleLinks:(from,to,adding) =>
+    if adding
+      @addNode(to)
+      @addLink(from.id,to.id,2)
+    ###
+    else
+      @graph.removeLink(@graph.hasLink(node.id,department.id))
+      @graph.removeNode(department.id)
+    ###
 
-    @rmvNode(node)
+
+    if not adding then @rmvNode(node)
 
 
 

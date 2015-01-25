@@ -3,15 +3,16 @@ module.exports.start = (listeners) ->
   svg = require("simplesvg")
   renderer = require("ngraph.svg")(graph,
     physics:
-      springLength: 500
+      springLength: 325
       springCoeff: 0.0008
-      gravity: -10
+      gravity: -5
       theta: .8
       dragCoeff: 0.005,
       timeStep:20
-
+      springTransform:(link, spring) ->
+                      if link.toId is "IC"
+                        spring.length = 375 + link.data*3;
   )
-
 
   renderer.node((node) =>
     svg = svg
@@ -40,8 +41,6 @@ module.exports.start = (listeners) ->
       $(circ).click((e) =>
         if e.shiftKey is true then listeners.departmentClicked(node.id)
       )
-
-
     return ui
   )
   .placeNode((nodeUI, pos) ->
@@ -49,14 +48,11 @@ module.exports.start = (listeners) ->
   )
 
   renderer.link((link) =>
-    console.log(link)
-
     return svg("line").attr("stroke", "#000")
-
   )
 
 
-  console.log(renderer)
+
   return {
   graph: graph
   renderer: renderer

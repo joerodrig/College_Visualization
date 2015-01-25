@@ -6,12 +6,17 @@
     svg = require("simplesvg");
     renderer = require("ngraph.svg")(graph, {
       physics: {
-        springLength: 500,
+        springLength: 325,
         springCoeff: 0.0008,
-        gravity: -10,
+        gravity: -5,
         theta: .8,
         dragCoeff: 0.005,
-        timeStep: 20
+        timeStep: 20,
+        springTransform: function(link, spring) {
+          if (link.toId === "IC") {
+            return spring.length = 375 + link.data * 3;
+          }
+        }
       }
     });
     renderer.node((function(_this) {
@@ -44,11 +49,9 @@
     });
     renderer.link((function(_this) {
       return function(link) {
-        console.log(link);
         return svg("line").attr("stroke", "#000");
       };
     })(this));
-    console.log(renderer);
     return {
       graph: graph,
       renderer: renderer,

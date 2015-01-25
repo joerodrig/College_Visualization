@@ -22,8 +22,8 @@
                     ng-repeat="(key,obj) in committees"
                     ng-click="committeeClicked(obj)">{{obj.committee_name}}
                 </li>
-                <li>
-                    Toggle Department Labels
+                <li ng-click="activateAll()">
+                    Activate All
                 </li>
                 <li>
                     Toggle User Labels

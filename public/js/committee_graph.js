@@ -91,13 +91,10 @@
       $('#demo').append(graphElement);
       this.graphParameters.renderer.run();
       this.initial();
-      console.log(this.graph);
-      console.log(this.graphParameters);
     }
 
     EmployeeGraph.prototype.initial = function() {
-      var mainNode, nodePosition, school, schoolNode, _i, _len, _ref, _results;
-      nodePosition = this.graphParameters.renderer.layout.getNodePosition;
+      var mainNode, properties, school, schoolNode, _ref, _results;
       mainNode = {
         id: "IC",
         type: "main"
@@ -105,50 +102,61 @@
       this.graphParameters.renderer.layout.pinNode(this.addNode(mainNode), true);
       _ref = this.schoolInfo.schools;
       _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        school = _ref[_i];
+      for (school in _ref) {
+        properties = _ref[school];
         schoolNode = {
-          id: school.name,
-          type: school.type
+          id: school,
+          type: properties.type,
+          size: properties.departments.length
         };
-        _results.push(this.graph.addLink(this.addNode(schoolNode).id, mainNode.id));
+        this.addNode(schoolNode);
+        _results.push(this.graph.addLink(schoolNode.id, mainNode.id, schoolNode.size));
       }
       return _results;
     };
 
-    EmployeeGraph.prototype.updateGraph = function(nodes, adding) {
-      var node, _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = nodes.length; _i < _len; _i++) {
-        node = nodes[_i];
-        if (adding) {
-          this.addNode(node);
-        }
-        if (node.type === "school") {
-          _results.push(this.toggleLinks(node, adding));
-
-          /*
-          if node.type is "user"
-            for work in node.workInfo
-              hasNode = @graph.getNode(work.location)
-               *Checking to see if department or school
-              if hasNode is undefined
-                associatedSchool = @returnSchool(work.location)
-                if @graph.hasLink(work.location,associatedSchool) is null
-                  @addLink(@addNode(work.location,"dn"), @linkSchool(work.location),1)
-              else if hasNode
-                if work.location.indexOf("School") isnt -1
-                   *Add a link to the school if user position is dean, or if that is the only link
-                  if node.workInfo.length == 1 || work.location.indexOf("Dean") isnt -1
-                    @addLink(node.id,work.location,2)
-                else
-                  @addLink(node.id,work.location)
-           */
-        } else {
-          _results.push(void 0);
+    EmployeeGraph.prototype.updateGraph = function(primaryNode, adding) {
+      var departmentName, properties, username, _ref, _ref1, _results;
+      if (primaryNode.type === "school") {
+        _ref = primaryNode.standardizedDepartments;
+        for (departmentName in _ref) {
+          properties = _ref[departmentName];
+          if (adding) {
+            this.toggleLinks(primaryNode, properties, adding);
+          }
         }
       }
-      return _results;
+      if (primaryNode.type === "department") {
+        _ref1 = primaryNode.standardizedUsers;
+        _results = [];
+        for (username in _ref1) {
+          properties = _ref1[username];
+          if (adding) {
+            _results.push(this.toggleLinks(primaryNode, properties, adding));
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      }
+
+      /*
+      if node.type is "user"
+        for work in node.workInfo
+          hasNode = @graph.getNode(work.location)
+           *Checking to see if department or school
+          if hasNode is undefined
+            associatedSchool = @returnSchool(work.location)
+            if @graph.hasLink(work.location,associatedSchool) is null
+              @addLink(@addNode(work.location,"dn"), @linkSchool(work.location),1)
+          else if hasNode
+            if work.location.indexOf("School") isnt -1
+               *Add a link to the school if user position is dean, or if that is the only link
+              if node.workInfo.length == 1 || work.location.indexOf("Dean") isnt -1
+                @addLink(node.id,work.location,2)
+            else
+              @addLink(node.id,work.location)
+       */
     };
 
     EmployeeGraph.prototype.addLink = function(from, to, strength) {
@@ -162,7 +170,7 @@
     EmployeeGraph.prototype.addNode = function(node) {
       if (this.graph.getNode(node.id) === void 0) {
         if (node.type === "user") {
-          return this.graph.addNode(node, {
+          return this.graph.addNode(node.id, {
             fill: "#000",
             size: "12",
             type: "user_node"
@@ -170,13 +178,18 @@
         } else if (node.type === "department") {
           return this.graph.addNode(node.id, {
             fill: "#AAA",
-            size: "14",
+            size: node.size,
             type: "department_node"
           });
         } else if (node.type === "school") {
+          if (node.size < 10) {
+            node.size = 10;
+          } else if (node.size > 25) {
+            node.size = 25;
+          }
           return this.graph.addNode(node.id, {
             fill: "#a3ff00",
-            size: "18",
+            size: node.size * 2,
             type: "school_node"
           });
         } else if (node.type === "main") {
@@ -191,21 +204,20 @@
 
     EmployeeGraph.prototype.rmvNode = function(node) {};
 
-    EmployeeGraph.prototype.toggleLinks = function(node, adding) {
-      var department, _i, _len, _ref;
-      if (node.type === "school") {
-        _ref = node.associatedDepartments;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          department = _ref[_i];
-          if (adding) {
-            this.addLink(node.id, this.addNode(department).id, 2);
-          } else {
-            this.graph.removeLink(this.graph.hasLink(node.id, department.id));
-            this.graph.removeNode(department.id);
-          }
-        }
+    EmployeeGraph.prototype.toggleLinks = function(from, to, adding) {
+      if (adding) {
+        this.addNode(to);
+        this.addLink(from.id, to.id, 2);
       }
-      return this.rmvNode(node);
+
+      /*
+      else
+        @graph.removeLink(@graph.hasLink(node.id,department.id))
+        @graph.removeNode(department.id)
+       */
+      if (!adding) {
+        return this.rmvNode(node);
+      }
     };
 
     return EmployeeGraph;
