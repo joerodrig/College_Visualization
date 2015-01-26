@@ -5,6 +5,108 @@
       "location": "Roy H. Park School of Communications"
     }
   ],
+
+  "jsimpson": [
+    {
+      "position": "Interim Dean",
+      "location": "School of Business"
+    },
+    {
+      "position": "Staff",
+      "location": "Graduate Study in Business"
+    }
+  ],
+
+  "bhoward": [
+    {
+      "position": "Associate Dean and Director of MBA Programs",
+      "location": "School of Business"
+    }
+  ],
+
+  "dkline": [
+    {
+      "position": "Assistant Dean",
+      "location": "School of Business"
+    }
+  ],
+
+  "pdeamer": [
+    {
+      "position": "Marketing Communications Manager",
+      "location": "Marketing Communications"
+    },
+    {
+      "position": "Staff",
+      "location": "School of Business"
+    },
+    {
+      "position": "Staff",
+      "location": "Office of Marketing Communications"
+    }
+  ],
+
+  "cdecker": [
+    {
+      "position": "Academic Services Coordinator",
+      "location": "School of Business"
+    }
+  ],
+  "khall2": [
+    {
+      "position": "Administrative Assistant",
+      "location": "School of Business"
+    }
+  ],
+
+  "shammond": [
+    {
+      "position": "Administrative Assistant",
+      "location": "School of Business"
+    }
+  ],
+
+  "mhaner": [
+    {
+      "position": "Assistant to the Dean and Budget Coordinator",
+      "location": "School of Business"
+    }
+  ],
+
+  "pperna": [
+    {
+      "position": "External Relations Program Director",
+      "location": "School of Business"
+    }
+  ],
+
+  "lshelhamer": [
+    {
+      "position": "Assessment and Research Analyst",
+      "location": "School of Business"
+    }
+  ],
+
+
+  "delias": [
+    {
+      "position": "Information Technology Specialist",
+      "location": "School of Business"
+    }
+  ],
+
+  "jives": [
+    {
+      "position": "Professor and Chair Graduate Program",
+      "location": "Department of Exercise and Sport Sciences"
+    },
+    {
+      "position": "Faculty",
+      "location": "School of Health Sciences and Human Performance"
+    }
+  ],
+
+
   "jives": [
     {
       "position": "Professor and Chair Graduate Program",
