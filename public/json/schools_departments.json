@@ -3,6 +3,7 @@
     {
       "short_name": "Humanities and Sciences",
       "departments": [
+        "Jewish Studies",
         "Department of Anthropology",
         "Department of English",
         "Graduate Study in Education",
@@ -36,7 +37,9 @@
         "Medieval and Renaissance Studies",
         "Mathematics and Computer Science",
         "Planned Studies Program",
-        "Department of Physics and Astronomy"
+        "Department of Physics and Astronomy",
+        "Humanities and Sciences Administration",
+        "Humanities and Sciences Other"
       ]
     }
   ,
@@ -46,7 +49,9 @@
       "departments": [
         "Music Theory, History, and Composition",
         "Music Education",
-        "Performance Studies"
+        "Performance Studies",
+        "Music Administration",
+        "Music Other"
       ]
     }
   ,
@@ -68,7 +73,9 @@
         "Preoptometry Option",
         "Department of Recreation and Leisure Studies",
         "Department of Speech-Language Pathology and Audiology",
-        "Graduate Study in Speech-Language Pathology and Audiology"
+        "Graduate Study in Speech-Language Pathology and Audiology",
+        "Health Sciences Administration",
+        "Health Sciences Other"
       ]
     }
   ,
@@ -88,7 +95,10 @@
         "Integrated Marketing Communications",
         "Org Comm Learning and Design",
         "Executive Masters in Communications Innovation",
-        "Department of Journalism"
+        "Department of Journalism",
+        "Media Arts, Sciences and Studies",
+        "Park Administration",
+        "Park Other"
       ]
     }
   ,
@@ -101,8 +111,29 @@
         "Graduate Study in Business",
         "Finance and International Business",
         "Marketing and Law",
-        "Marketing"
+        "Marketing",
+        "Business Administration",
+        "Business Other"
       ]
-    }
+    },
+
+  "Orphans":
+  {
+    "short_name":"Orphans",
+    "departments":[
+      "Honors Program",
+      "New York City Program/Center",
+      "JB Pendleton Center Los Angeles",
+      "Summer Sessions OES",
+      "Center for the Study of Culture, Race, and Ethnicity",
+      "Systems and Departmental Services",
+      "Park Center for Independent Media",
+      "Library",
+      "Center for the Study of Culture, Race and Ethnicity",
+      "Class of 2005",
+      "EMPTY"
+    ]
+
+  }
 
 }

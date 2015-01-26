@@ -19,13 +19,13 @@ ICCVApp.controller "ICCVCtrl", [
     $scope.showExtraInfo = false
     $scope.positionCount = []
     $scope.departmentCount = []
-    $scope.committees = [
-      {
+    $scope.committees =
+      "C1" : {
         id: "C1"
         committee_name: "Committee One"
         people: ["cmckenzie"]
-      }
-      {
+      },
+      "C3":{
         id: "C3"
         committee_name: "CS Committee"
         people: [
@@ -37,7 +37,7 @@ ICCVApp.controller "ICCVCtrl", [
           "tdragon"
         ]
       }
-      {
+      "C4":{
         id: "C4"
         committee_name: "Another Committee"
         people: [
@@ -47,7 +47,7 @@ ICCVApp.controller "ICCVCtrl", [
           "ppospisil"
         ]
       }
-    ]
+
 
     # [asynchronously] Retrieving work info
     $scope.workInfo = $http.get("json/work_info.json").success((data, status, headers, config) ->
@@ -93,20 +93,40 @@ ICCVApp.directive "graph", ($http, $q) ->
 
       #Map users who are only linked to a school for quick access
       user2SchoolMap = () =>
-        schoolsMap = {}
+        inAdministration = (position) =>
+          return workInfo.position.indexOf("Dean") isnt -1 or workInfo.position.indexOf("Provost") isnt -1 or workInfo.position.indexOf("President") isnt -1
         for username,work of scope.workInfo
-          if work.length is 1
-            for key,workInfo of work
-              for school of scope.schools
-                if school is workInfo.location
-                  if schoolsMap[school] is undefined
-                    schoolsMap[school] = []
-                  schoolsMap[school].push(username)
-        return schoolsMap
+          for key,workInfo of work
+            for school,schoolInfo of scope.schools
+              if school is workInfo.location
+                if school is "School of Humanities and Sciences"
+                  administration = "Humanities and Sciences Administration"
+                  other          = "Humanities and Sciences Other"
+                else if school is "School of Music"
+                  administration = "Music Administration"
+                  other          = "Music Other"
+                else if school is "School of Health Sciences and Human Performance"
+                  administration = "Health Sciences Administration"
+                  other          = "Health Sciences Other"
+                else if school is "Roy H. Park School of Communications"
+                  administration = "Park Administration"
+                  other          = "Park Other"
+                else if school is "School of Business"
+                  administration = "Business Administration"
+                  other          = "Business Other"
+                else if school is "Orphans"
+                  workInfo.location = "Orphans Other"
+
+                if inAdministration(workInfo.position)
+                  workInfo.location = administration
+                else if work.length is 1
+                  workInfo.position = other
+
+      user2SchoolMap()
 
       #Make any modifications to school object before passing into graph here
       schools = () =>
-        setLinkedUsers = (department) =>
+        usersToDepartment = (department) =>
           department.standardizedUsers = {}
           standardizedUsers = department.standardizedUsers
           for username,workInfo of scope.workInfo
@@ -118,35 +138,46 @@ ICCVApp.directive "graph", ($http, $q) ->
                   id: username,
                   type:"user",
                   size:"8"
+                  fill:"#000"
                 }
-
-
 
         for school,schoolInfo of scope.schools
           scope.schools[school].id = school
           scope.schools[school].type = "school"
           schoolInfo.standardizedDepartments = {}
+          schoolInfo.standardizedUsers = {}
           for department in schoolInfo.departments
             schoolInfo.standardizedDepartments[department] = {
               id: department,
-              type:"department",
-              size:"16"
+              type:"department"
+              fill:"#88dddd"
               }
-            setLinkedUsers(schoolInfo.standardizedDepartments[department])
-
+            usersToDepartment(schoolInfo.standardizedDepartments[department])
+            schoolInfo.standardizedDepartments[department].size = Object.keys(schoolInfo.standardizedDepartments[department].standardizedUsers).length
+            if schoolInfo.standardizedDepartments[department].size < 12
+              schoolInfo.standardizedDepartments[department].size = 12
+          for username,work of scope.workInfo
+            if work.length is 1
+              for key,workInfo of work
+                  if school is workInfo.location
+                    schoolInfo.standardizedUsers[username] = {
+                      id: username,
+                      type:"user",
+                      size:"8"
+                      fill:"#000"
+                    }
         return
 
       schools()
 
 
-
-      user2SchoolMap()
       options = container: attrs.container
       loadedData =
         workInfo         : scope.workInfo
         schools          : scope.schools
         schoolClicked    : scope.schoolClicked
         departmentClicked: scope.departmentClicked
+        userClicked      : scope.userClicked
 
       scope.g = new CommitteeGraph.initialize(element[0], loadedData, options)
       return
@@ -154,30 +185,31 @@ ICCVApp.directive "graph", ($http, $q) ->
 
     #UI changes
 
-    scope.activateAll = () ->
+    scope.expandAllSchools = () ->
       for school, properties of scope.schools
         scope.schoolClicked(school)
-        for d in properties.departments
-          scope.departmentClicked(d)
 
     scope.toggleExtraInfo = TEI = (show) ->
       scope.showExtraInfo = show
       return
 
     scope.committeeClicked = (committee) ->
-      scope.setActiveGroup committee.committee_name
-      membersInfo = []
-      $.each(committee.people, (key, name) ->
-        membersInfo.push
-          id: name
-          workInfo: scope.workInfo[name]
-      )
+      #scope.setActiveGroup committee.committee_name
 
-      scope.loadMembers membersInfo
+      for name in scope.committees[committee.id].people
+        workLocations = scope.workInfo[name].locations
+        for location,position of workLocations
+          if location.indexOf("School") isnt -1
+            if scope.isSchoolActive(location) is false
+              scope.schoolClicked(location)
+          else
+            if scope.isDepartmentActive(location) is false
+              scope.departmentClicked(location)
+
       return
 
     scope.schoolClicked = (school) ->
-      addDepartments        = school in scope.activeSchools
+      addDepartments        = scope.isSchoolActive(school)
       scope.updateActiveSchools(school)
       selectedSchool = scope.schools[school]
       scope.updateGraph(selectedSchool,!addDepartments)
@@ -190,37 +222,61 @@ ICCVApp.directive "graph", ($http, $q) ->
             if d is department
               return school
 
-      addPeople = department in scope.activeDepartments
-      if addPeople
+      linkedSchool = getLinkedSchool()
+
+      addPeople = !scope.isDepartmentActive(department)
+      if addPeople is true and scope.isSchoolActive(linkedSchool) is false
+        scope.schoolClicked(linkedSchool)
+      if addPeople is false
         scope.activeDepartments.splice(scope.activeDepartments.indexOf(department),1)
       else
         scope.activeDepartments.push(department)
+        console.log(scope.activeDepartments)
 
-      linkedSchool = getLinkedSchool()
+
       selectedDepartment = scope.schools[linkedSchool].standardizedDepartments[department]
-      scope.updateGraph(selectedDepartment,!addPeople)
+      #Alter fill color of any users that are in schools or departments not already activated
+      for username,properties of selectedDepartment.standardizedUsers
+        for location,position of scope.workInfo[username].locations
+          allActiveLocations = scope.isLocationActive(location)
+          if allActiveLocations is false then break
+        if allActiveLocations is false then properties.fill = "orange"
+        else properties.fill = "#000"
 
+      scope.updateGraph(selectedDepartment,addPeople)
 
-      #Activate/deactivate all other schools a user may be connected to
-        #TODO: This is a bad solution that I don't want to implement as it can cause an awful chain reaction
+    scope.userClicked = (user) ->
+      #When a user is clicked, we want to find all of their locations and activate them
+      #It doesn't make sense to collapse locations through user interaction -- we can only add
+      schoolsArray = Object.keys(scope.schools)
+      for location,position of scope.workInfo[user].locations
+        if schoolsArray.indexOf(location) isnt -1
+          if scope.isSchoolActive(location) isnt true
+            scope.schoolClicked(location)
+        else if scope.isDepartmentActive(location) isnt true
+            scope.departmentClicked(location)
 
+    ###
+    Description: We do not know or need to know whether the location is a department or school,
+     only whether or not the current location is active
+    Input: [String] location - location name
+    ###
+    scope.isLocationActive = (location) ->
+      return scope.isSchoolActive(location) or scope.isDepartmentActive(location)
 
+    scope.isSchoolActive = (school) ->
+      return school in scope.activeSchools
+
+    scope.isDepartmentActive = (department) ->
+      return department in scope.activeDepartments
 
     scope.updateActiveSchools = (school) ->
-      departments = []
       if school in scope.activeSchools
         scope.activeSchools.splice(scope.activeSchools.indexOf(school),1)
         for dep in scope.schools[school].departments
-          #Deactivate department if it is currently active
-          if scope.activeDepartments.indexOf(department) isnt -1
-            scope.departmentClicked(department)
-          departments.push(dep)
+          if scope.isDepartmentActive(dep) is true then scope.departmentClicked(dep)
       else
-        for dep in scope.schools[school].departments
-          departments.push(dep)
-
-      return departments
-
+        scope.activeSchools.push(school)
 
     scope.updateGraph =(nodes,add) ->
       scope.g.updateGraph(nodes,add)
@@ -228,55 +284,6 @@ ICCVApp.directive "graph", ($http, $q) ->
 
     scope.toggleDepartmentLabels = () ->
       $scope.activeDepartmentLabels = !$scope.activeDepartmentLabels
-
-
-    scope.updateCounts = updateCounts = (membersInfo) ->
-      scope.positionCount = []
-      scope.departmentCount = []
-      $.each membersInfo, (key, user) ->
-        $.each user.workInfo, (key, workInfo) ->
-          if scope.positionCount.length is 0
-            scope.positionCount.push
-              position: workInfo.position
-              count: 1
-
-          if scope.departmentCount.length is 0
-            scope.departmentCount.push
-              department: workInfo.location
-              count: 1
-
-          i = 0
-
-          while i < scope.positionCount.length
-            if scope.positionCount[i].position is workInfo.position
-              scope.positionCount[i].count++
-              break
-            else if i is scope.positionCount.length - 1
-              scope.positionCount.push
-                position: workInfo.position
-                count: 1
-
-              break
-            i++
-          j = 0
-
-          while j < scope.departmentCount.length
-            if scope.departmentCount[j].department is workInfo.location
-              scope.departmentCount[j].count++
-              break
-            else if j is scope.departmentCount.length - 1
-              scope.departmentCount.push
-                department: workInfo.location
-                count: 1
-
-              break
-            j++
-          return
-
-        return
-
-      return
-
 
 
   restrict: "E"

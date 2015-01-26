@@ -29,6 +29,11 @@ svg {
     height: 8%;
 }
 
+.user_node_label:hover {
+    font-size:18px;
+}
+
+
 /***
 *Committee Sidebar
 ***/

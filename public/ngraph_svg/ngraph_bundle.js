@@ -8,14 +8,15 @@
     renderer = require("ngraph.svg")(graph, {
       physics: {
         springLength: 325,
-        springCoeff: 0.0008,
+        springCoeff: 0.000008,
         gravity: -5,
-        theta: .8,
+        theta: 1,
         dragCoeff: 0.005,
-        timeStep: 20,
+        timeStep: 50,
         springTransform: function(link, spring) {
-          if (link.toId === "IC") {
-            return spring.length = 375 + link.data * 3;
+          if (link.toId === "Ithaca College") {
+            spring.length = 450 + link.data * 3;
+            return spring.weight = 0.5;
           }
         }
       }
@@ -26,7 +27,7 @@
         svg = svg;
         ui = svg('g');
         circ = svg("circle").attr('fill', node.data.fill).attr('r', node.data.size).attr('class', node.data.type);
-        txt = svg('text').attr('font-size', "18px").attr('text-anchor', 'middle').attr('y', parseInt("-" + node.data.size + (-17))).attr('class', node.data.type + "_label").attr("ng-class", "{'label_active': activeDepartmentLabels  } ");
+        txt = svg('text').attr('font-size', node.data.textSize).attr('text-anchor', 'middle').attr('y', parseInt("-" + node.data.size + (-18))).attr('class', node.data.type + "_label");
         txt.textContent = node.id;
         ui.append(circ);
         ui.append(txt);
@@ -40,6 +41,12 @@
           $(circ).click(function(e) {
             if (e.shiftKey === true) {
               return listeners.departmentClicked(node.id);
+            }
+          });
+        } else if (node.data.type === "user_node") {
+          $(circ).click(function(e) {
+            if (e.shiftKey === true) {
+              return listeners.userClicked(node.id);
             }
           });
         }

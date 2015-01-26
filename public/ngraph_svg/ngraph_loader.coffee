@@ -4,14 +4,15 @@ module.exports.start = (listeners) ->
   renderer = require("ngraph.svg")(graph,
     physics:
       springLength: 325
-      springCoeff: 0.0008
+      springCoeff: 0.000008
       gravity: -5
-      theta: .8
+      theta: 1
       dragCoeff: 0.005,
-      timeStep:20
+      timeStep:50
       springTransform:(link, spring) ->
-                      if link.toId is "IC"
-                        spring.length = 375 + link.data*3;
+                      if link.toId is "Ithaca College"
+                        spring.length = 450 + link.data*3
+                        spring.weight = 0.5
   )
 
   renderer.node((node) =>
@@ -24,9 +25,9 @@ module.exports.start = (listeners) ->
     .attr('class', node.data.type)
 
     txt = svg('text').
-    attr('font-size', "18px").
+    attr('font-size', node.data.textSize).
     attr('text-anchor', 'middle').
-    attr('y', parseInt("-" + node.data.size + (-17))).
+    attr('y', parseInt("-" + node.data.size + (-18))).
     attr('class', node.data.type + "_label")
     txt.textContent = node.id
 
@@ -35,11 +36,15 @@ module.exports.start = (listeners) ->
 
     if node.data.type is "school_node"
       $(circ).click((e) =>
-        if e.shiftKey is true then  listeners.schoolClicked(node.id)
+        if e.shiftKey is true then listeners.schoolClicked(node.id)
       )
     else if node.data.type is "department_node"
       $(circ).click((e) =>
         if e.shiftKey is true then listeners.departmentClicked(node.id)
+      )
+    else if node.data.type is "user_node"
+      $(circ).click((e) =>
+        if e.shiftKey is true then listeners.userClicked(node.id)
       )
     return ui
   )
