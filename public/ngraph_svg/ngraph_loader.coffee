@@ -13,6 +13,10 @@ module.exports.start = (listeners) ->
                       if link.toId is "Ithaca College"
                         spring.length = 450 + link.data*3
                         spring.weight = 0.5
+                      if link.data is 999
+                        spring.length = 9999
+                        spring.weight = 0
+                        spring.coeff  = 0
   )
 
   renderer.node((node) =>
@@ -53,7 +57,8 @@ module.exports.start = (listeners) ->
   )
 
   renderer.link((link) =>
-    return svg("line").attr("stroke", "#000")
+    if link.data is 999 then return svg("line").attr("stroke", "red").attr('stroke-width',4)
+    else return svg("line").attr("stroke", "#000")
   )
 
 

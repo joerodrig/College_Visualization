@@ -13,6 +13,7 @@ ICCVApp.controller "ICCVCtrl", [
   "$http"
   ($scope, $http) ->
     $scope.activeDepartmentLabels = true
+    $scope.activeCommittee = {id: null, members: []}
     $scope.activeGroupName
     $scope.activeSchools = []
     $scope.activeDepartments = []
@@ -194,9 +195,15 @@ ICCVApp.directive "graph", ($http, $q) ->
       return
 
     scope.committeeClicked = (committee) ->
-      #scope.setActiveGroup committee.committee_name
+      #Remove links to previous active committee members
+      scope.updateGraph({type:"committee_links",members:scope.activeCommittee.members},false)
+
+      scope.activeCommittee.members = []
+      scope.activeCommittee.id = committee.committee_name
+
 
       for name in scope.committees[committee.id].people
+        scope.activeCommittee.members.push(name)
         workLocations = scope.workInfo[name].locations
         for location,position of workLocations
           if location.indexOf("School") isnt -1
@@ -206,6 +213,7 @@ ICCVApp.directive "graph", ($http, $q) ->
             if scope.isDepartmentActive(location) is false
               scope.departmentClicked(location)
 
+      scope.updateGraph({type:"committee_links",members:scope.activeCommittee.members},true)
       return
 
     scope.schoolClicked = (school) ->
@@ -231,7 +239,6 @@ ICCVApp.directive "graph", ($http, $q) ->
         scope.activeDepartments.splice(scope.activeDepartments.indexOf(department),1)
       else
         scope.activeDepartments.push(department)
-        console.log(scope.activeDepartments)
 
 
       selectedDepartment = scope.schools[linkedSchool].standardizedDepartments[department]

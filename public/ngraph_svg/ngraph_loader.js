@@ -15,7 +15,12 @@
         springTransform: function(link, spring) {
           if (link.toId === "Ithaca College") {
             spring.length = 450 + link.data * 3;
-            return spring.weight = 0.5;
+            spring.weight = 0.5;
+          }
+          if (link.data === 999) {
+            spring.length = 9999;
+            spring.weight = 0;
+            return spring.coeff = 0;
           }
         }
       }
@@ -56,7 +61,11 @@
     });
     renderer.link((function(_this) {
       return function(link) {
-        return svg("line").attr("stroke", "#000");
+        if (link.data === 999) {
+          return svg("line").attr("stroke", "red").attr('stroke-width', 4);
+        } else {
+          return svg("line").attr("stroke", "#000");
+        }
       };
     })(this));
     return {

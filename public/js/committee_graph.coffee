@@ -77,6 +77,16 @@ class EmployeeGraph extends Graph
       for username,properties of primaryNode.standardizedUsers
         @toggleLinks(primaryNode,properties,adding)
 
+    if primaryNode.type is "committee_links"
+      previous = null
+      index = 0
+      while index < primaryNode.members.length
+        if primaryNode.members[index+1] isnt undefined and adding
+          @graph.addLink(primaryNode.members[index],primaryNode.members[index+1],999)
+        else if adding is not true
+          @graph.removeLink(@graph.hasLink(primaryNode.members[index],primaryNode.members[index+1]))
+        index++
+
 
   addNode: (node)=>
     if @graph.getNode(node.id) is undefined

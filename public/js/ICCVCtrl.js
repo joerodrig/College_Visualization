@@ -19,6 +19,10 @@
   ICCVApp.controller("ICCVCtrl", [
     "$scope", "$http", function($scope, $http) {
       $scope.activeDepartmentLabels = true;
+      $scope.activeCommittee = {
+        id: null,
+        members: []
+      };
       $scope.activeGroupName;
       $scope.activeSchools = [];
       $scope.activeDepartments = [];
@@ -248,9 +252,16 @@
       };
       scope.committeeClicked = function(committee) {
         var location, name, position, workLocations, _i, _len, _ref;
+        scope.updateGraph({
+          type: "committee_links",
+          members: scope.activeCommittee.members
+        }, false);
+        scope.activeCommittee.members = [];
+        scope.activeCommittee.id = committee.committee_name;
         _ref = scope.committees[committee.id].people;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           name = _ref[_i];
+          scope.activeCommittee.members.push(name);
           workLocations = scope.workInfo[name].locations;
           for (location in workLocations) {
             position = workLocations[location];
@@ -265,6 +276,10 @@
             }
           }
         }
+        scope.updateGraph({
+          type: "committee_links",
+          members: scope.activeCommittee.members
+        }, true);
       };
       scope.schoolClicked = function(school) {
         var addDepartments, selectedSchool;
@@ -300,7 +315,6 @@
           scope.activeDepartments.splice(scope.activeDepartments.indexOf(department), 1);
         } else {
           scope.activeDepartments.push(department);
-          console.log(scope.activeDepartments);
         }
         selectedDepartment = scope.schools[linkedSchool].standardizedDepartments[department];
         _ref = selectedDepartment.standardizedUsers;

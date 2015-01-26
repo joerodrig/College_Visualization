@@ -129,7 +129,7 @@
     };
 
     EmployeeGraph.prototype.updateGraph = function(primaryNode, adding) {
-      var departmentName, properties, username, _ref, _ref1, _results;
+      var departmentName, index, previous, properties, username, _ref, _ref1, _results;
       if (primaryNode.type === "school") {
         _ref = primaryNode.standardizedDepartments;
         for (departmentName in _ref) {
@@ -139,10 +139,22 @@
       }
       if (primaryNode.type === "department") {
         _ref1 = primaryNode.standardizedUsers;
-        _results = [];
         for (username in _ref1) {
           properties = _ref1[username];
-          _results.push(this.toggleLinks(primaryNode, properties, adding));
+          this.toggleLinks(primaryNode, properties, adding);
+        }
+      }
+      if (primaryNode.type === "committee_links") {
+        previous = null;
+        index = 0;
+        _results = [];
+        while (index < primaryNode.members.length) {
+          if (primaryNode.members[index + 1] !== void 0 && adding) {
+            this.graph.addLink(primaryNode.members[index], primaryNode.members[index + 1], 999);
+          } else if (adding === !true) {
+            this.graph.removeLink(this.graph.hasLink(primaryNode.members[index], primaryNode.members[index + 1]));
+          }
+          _results.push(index++);
         }
         return _results;
       }
