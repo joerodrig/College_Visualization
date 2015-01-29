@@ -28,17 +28,17 @@
 
   Controller = (function() {
     function Controller(data, options) {
-      var clickListeners, employeeGraph;
-      clickListeners = {
-        schoolClicked: data.schoolClicked,
-        departmentClicked: data.departmentClicked,
-        userClicked: data.userClicked
-      };
-      employeeGraph = new EmployeeGraph(data, clickListeners, options);
+      var employeeGraph;
+      employeeGraph = new EmployeeGraph(data, options);
       return {
         updateGraph: (function(_this) {
           return function(nodes, adding) {
             return employeeGraph.updateGraph(nodes, adding);
+          };
+        })(this),
+        pinNode: (function(_this) {
+          return function(node) {
+            return employeeGraph.pinNode(node);
           };
         })(this)
       };
@@ -60,7 +60,6 @@
         renderer: createdGraph.renderer,
         svg: createdGraph.svg
       };
-      return;
     }
 
     return Graph;
@@ -80,6 +79,7 @@
       this.addLink = __bind(this.addLink, this);
       this.removeLink = __bind(this.removeLink, this);
       this.toggleLinks = __bind(this.toggleLinks, this);
+      this.updateNodeAttributes = __bind(this.updateNodeAttributes, this);
       this.addNode = __bind(this.addNode, this);
       this.updateGraph = __bind(this.updateGraph, this);
       this.initial = __bind(this.initial, this);
@@ -92,11 +92,19 @@
       $('#demo').append(graphElement);
       this.graphParameters.renderer.run();
       this.initial();
+      console.log(this.graph.getNode("Ithaca College"));
+      console.log(this.graph);
+      console.log(this.graphParameters);
     }
 
     EmployeeGraph.prototype.pinNode = function(node) {
-      console.log(this.graph.getNode(node));
-      return this.graphParameters.renderer.layout.pinNode(this.graph.getNode(node), true);
+      var gNode;
+      gNode = this.graph.getNode(node);
+      if (this.graphParameters.renderer.layout.isNodePinned(gNode) !== true) {
+        return this.graphParameters.renderer.layout.pinNode(this.graph.getNode(node), true);
+      } else {
+        return this.graphParameters.renderer.layout.pinNode(this.graph.getNode(node), false);
+      }
     };
 
     EmployeeGraph.prototype.initial = function() {
@@ -110,7 +118,9 @@
       mainNode = {
         id: "Ithaca College",
         type: "main",
-        size: totalDepartments
+        size: totalDepartments,
+        fill: "#0055bb",
+        textSize: "38px"
       };
       this.graphParameters.renderer.layout.pinNode(this.addNode(mainNode), true);
       _ref1 = this.schoolInfo.schools;
@@ -120,6 +130,8 @@
         schoolNode = {
           id: school,
           type: properties.type,
+          fill: properties.fill,
+          textSize: "38px",
           size: properties.departments.length
         };
         this.addNode(schoolNode);
@@ -162,41 +174,58 @@
 
     EmployeeGraph.prototype.addNode = function(node) {
       if (this.graph.getNode(node.id) === void 0) {
-        if (node.type === "user") {
-          return this.graph.addNode(node.id, {
-            fill: node.fill,
-            size: "10",
-            textSize: "16px",
-            type: "user_node"
-          });
-        } else if (node.type === "department") {
-          return this.graph.addNode(node.id, {
-            fill: node.fill,
-            size: node.size,
-            textSize: "18px",
-            type: "department_node"
-          });
-        } else if (node.type === "school") {
+        if (node.type === "school") {
           if (node.size < 14) {
             node.size = 14;
           } else if (node.size > 25) {
             node.size = 25;
           }
-          return this.graph.addNode(node.id, {
-            fill: "#bbeeff",
-            size: node.size * 2,
-            textSize: "38px",
-            type: "school_node"
-          });
-        } else if (node.type === "main") {
-          return this.graph.addNode(node.id, {
-            fill: "#0055bb",
-            size: node.size,
-            textSize: "38px",
-            type: "main_node"
-          });
+          node.size = node.size * 2;
+        }
+        return this.graph.addNode(node.id, {
+          fill: node.fill,
+          size: node.size,
+          textSize: node.textSize,
+          type: node.type + "_node"
+        });
+      } else {
+        return this.updateNodeAttributes(node);
+      }
+    };
+
+
+    /*
+    Description: Get all node links from current loaded node in graph. Remove the current node in graph. Re-add node
+    with new properties. Re-add links
+    TODO: Re-add node in same position
+     */
+
+    EmployeeGraph.prototype.updateNodeAttributes = function(node) {
+      var currNode, currNodeLinks, l, link, links, _i, _j, _len, _len1, _ref, _results;
+      currNode = this.graph.getNode(node.id);
+      currNodeLinks = currNode.links;
+      links = [];
+      _ref = currNode.links;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        link = _ref[_i];
+        links.push({
+          fromId: link.fromId,
+          toId: link.toId,
+          strength: link.data
+        });
+      }
+      this.graph.removeNode(node.id);
+      this.addNode(node);
+      _results = [];
+      for (_j = 0, _len1 = links.length; _j < _len1; _j++) {
+        l = links[_j];
+        if (l.fromId !== node.id) {
+          _results.push(this.addLink(l.fromId, node.id, l.strength));
+        } else {
+          _results.push(this.addLink(node.id, l.toId, l.strength));
         }
       }
+      return _results;
     };
 
     EmployeeGraph.prototype.toggleLinks = function(from, to, adding) {
@@ -204,21 +233,21 @@
         this.addNode(to);
         return this.addLink(from.id, to.id, 2);
       } else {
-        return this.removeLink(from.id, to.id);
+        return this.removeLink(from.id, to);
       }
     };
 
-    EmployeeGraph.prototype.removeLink = function(fromID, toID) {
-      this.graph.removeLink(this.graph.hasLink(fromID, toID));
-      if (this.graph.getLinks(toID).length < 1) {
-        return this.graph.removeNode(toID);
+    EmployeeGraph.prototype.removeLink = function(fromID, to) {
+      this.graph.removeLink(this.graph.hasLink(fromID, to.id));
+      if (this.graph.getLinks(to.id).length < 1) {
+        return this.graph.removeNode(to.id);
+      } else {
+        return this.updateNodeAttributes(to);
       }
     };
 
     EmployeeGraph.prototype.addLink = function(from, to, strength) {
-      var hasLink;
-      hasLink = this.graph.hasLink(from, to);
-      if (hasLink === null) {
+      if (this.graph.hasLink(from, to) === null) {
         return this.graph.addLink(from, to, strength);
       }
     };

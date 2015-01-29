@@ -5,6 +5,7 @@
     <title>IC Visualization</title>
     <link rel="stylesheet" href="css/bootstrap.min.css"/>
     <link rel="stylesheet" href="css/page-style.css"/>
+    <link href='http://fonts.googleapis.com/css?family=Cinzel' rel='stylesheet' type='text/css'>
     <style type="text/css" media="screen">
     </style>
     <script type="text/javascript"
@@ -13,21 +14,15 @@
 <body ng-controller="ICCVCtrl">
 <div style="height:100%;">
     <!-- Committees -->
-    <div class="col-sm-2 committee_sidebar">
-        <nav class="navbar" role="navigation">
-            <ul class="nav nav-pills nav-stacked">
-                <li ng-cloak ng-show="committees"
-                    class="text-center committee noselect"
-                    ng-class="{'committee_active':obj.committee_name == activeGroupName}"
-                    ng-repeat="(key,obj) in committees"
-                    ng-click="committeeClicked(obj)">{{obj.committee_name}}
-                </li>
-            </ul>
-        </nav>
-
-    </div>
+    <!-- Disabled for Exploratory Graph -->
+   <!--
+-->
     <!-- Graph -->
-    <graph id="graph_location" data-initialGraph="employee" data-container="demo" class="col-xs-12 col-sm-10"></graph>
+    <graph id="graph_location"
+           data-graphType="committee"
+           data-initialGraph="employee"
+           data-container="demo"
+           class="col-xs-12 col-sm-12"></graph>
 </div>
 
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>

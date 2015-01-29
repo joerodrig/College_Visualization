@@ -19,14 +19,13 @@
   ICCVApp.controller("ICCVCtrl", [
     "$scope", "$http", function($scope, $http) {
       $scope.activeDepartmentLabels = true;
+      $scope.committeesMenu;
       $scope.activeCommittee = {
         id: null,
         members: []
       };
-      $scope.activeGroupName;
       $scope.activeSchools = [];
       $scope.activeDepartments = [];
-      $scope.showExtraInfo = false;
       $scope.positionCount = [];
       $scope.departmentCount = [];
       $scope.committees = {
@@ -44,6 +43,11 @@
           id: "C4",
           committee_name: "Another Committee",
           people: ["jhilton", "euell", "ebleicher", "ppospisil"]
+        },
+        "C5": {
+          id: "C5",
+          committee_name: "H&S Senate",
+          people: ["bmurday", "jjolly", "jtennant", "cstetson", "kdsullivan", "pcole", "wdann", "mdifrancesco", "gleitman", "mklemm", "sstansfield", "rplante", "dturkon", "eganh"]
         }
       };
       $scope.workInfo = $http.get("json/work_info.json").success(function(data, status, headers, config) {
@@ -66,13 +70,16 @@
   ICCVApp.directive("graph", function($http, $q) {
     var linker;
     linker = function(scope, element, attrs) {
-      var TEI;
+      var toggleSettings;
       $q.all([scope.workInfo, scope.schools, scope.canonical]).then(function() {
         var convert, job, loadedData, nameFix, nameIssue, options, schools, user2SchoolMap, username, workInfo, _i, _len, _ref, _ref1;
         console.log("Graph Dependencies Loaded");
+        scope.expandAllSchools = false;
+        scope.pinAllSchools = false;
+        console.log(attrs);
         convert = (function(_this) {
           return function() {};
-        })(this);
+        })(this)();
         _ref = scope.workInfo;
         for (username in _ref) {
           workInfo = _ref[username];
@@ -87,7 +94,6 @@
             }
           }
         }
-        convert();
         user2SchoolMap = (function(_this) {
           return function() {
             var administration, inAdministration, key, other, school, schoolInfo, work, _ref2, _results;
@@ -147,8 +153,7 @@
             }
             return _results;
           };
-        })(this);
-        user2SchoolMap();
+        })(this)();
         schools = (function(_this) {
           return function() {
             var department, key, school, schoolInfo, usersToDepartment, work, _j, _len1, _ref2, _ref3, _ref4;
@@ -171,7 +176,8 @@
                       _results1.push(standardizedUsers[username] = {
                         id: username,
                         type: "user",
-                        size: "8",
+                        size: "20",
+                        textSize: "16px",
                         fill: "#000"
                       });
                     } else {
@@ -188,6 +194,7 @@
               schoolInfo = _ref2[school];
               scope.schools[school].id = school;
               scope.schools[school].type = "school";
+              scope.schools[school].fill = "#bbeeff";
               schoolInfo.standardizedDepartments = {};
               schoolInfo.standardizedUsers = {};
               _ref3 = schoolInfo.departments;
@@ -196,7 +203,8 @@
                 schoolInfo.standardizedDepartments[department] = {
                   id: department,
                   type: "department",
-                  fill: "#88dddd"
+                  fill: "#88dddd",
+                  textSize: "16px"
                 };
                 usersToDepartment(schoolInfo.standardizedDepartments[department]);
                 schoolInfo.standardizedDepartments[department].size = Object.keys(schoolInfo.standardizedDepartments[department].standardizedUsers).length;
@@ -223,45 +231,110 @@
               }
             }
           };
-        })(this);
-        schools();
+        })(this)();
         options = {
           container: attrs.container
         };
         loadedData = {
           workInfo: scope.workInfo,
-          schools: scope.schools,
-          schoolClicked: scope.schoolClicked,
-          departmentClicked: scope.departmentClicked,
-          userClicked: scope.userClicked
+          schools: scope.schools
         };
         scope.g = new CommitteeGraph.initialize(element[0], loadedData, options);
+        if (attrs.graphtype === "explorative") {
+          scope.graphType = "explorative";
+          scope.committeeBarExists = false;
+          (function() {
+            return $('svg').click(function(e) {
+              var nodeClicked;
+              nodeClicked = e.target.attributes.identifier;
+              if (nodeClicked !== void 0) {
+                return scope.nodeClicked(e);
+              }
+            });
+          })();
+        } else if (attrs.graphtype === "committee") {
+          scope.graphType = "committee";
+          scope.committeeBarExists = true;
+        }
       });
-      scope.expandAllSchools = function() {
+      scope.nodeClicked = function(e) {
+        var nodeId, nodeType;
+        if (e.shiftKey === true) {
+          nodeType = e.target.className.baseVal;
+          nodeId = e.target.attributes.identifier.value;
+          if (nodeType === "department_node" || nodeType === "department_node_label") {
+            return scope.departmentClicked(nodeId);
+          } else if (nodeType === "school_node" || nodeType === "school_node_label") {
+            return scope.schoolClicked(nodeId);
+          } else if (nodeType === "user_node" || nodeType === "user_node_label") {
+            return scope.userClicked(nodeId);
+          }
+        }
+      };
+      scope.toggleSchools = function(expand) {
         var properties, school, _ref, _results;
         _ref = scope.schools;
         _results = [];
         for (school in _ref) {
           properties = _ref[school];
-          _results.push(scope.schoolClicked(school));
+          if (expand === true && scope.isSchoolActive(school) !== true) {
+            _results.push(scope.schoolClicked(school));
+          } else if (expand !== true && scope.isSchoolActive(school) === true) {
+            _results.push(scope.schoolClicked(school));
+          } else {
+            _results.push(void 0);
+          }
         }
         return _results;
       };
-      scope.toggleExtraInfo = TEI = function(show) {
-        scope.showExtraInfo = show;
+      scope.pinSchools = function(pin) {
+        var properties, school, _ref, _results;
+        _ref = scope.schools;
+        _results = [];
+        for (school in _ref) {
+          properties = _ref[school];
+          _results.push(scope.g.pinNode(school));
+        }
+        return _results;
+      };
+      scope.toggleSettings = toggleSettings = function(show) {
+        scope.showSettings = show;
       };
       scope.committeeClicked = function(committee) {
-        var location, name, position, workLocations, _i, _len, _ref;
+        var department, info, location, name, position, properties, school, workLocations, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
         scope.updateGraph({
           type: "committee_links",
           members: scope.activeCommittee.members
         }, false);
         scope.activeCommittee.members = [];
+        scope.activeCommittee.departments = [];
         scope.activeCommittee.id = committee.committee_name;
         _ref = scope.committees[committee.id].people;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           name = _ref[_i];
           scope.activeCommittee.members.push(name);
+          workLocations = scope.workInfo[name].locations;
+          for (location in workLocations) {
+            position = workLocations[location];
+            if (location.indexOf("School") === -1 && scope.isFoundIn(location, scope.activeCommittee.departments) !== true) {
+              scope.activeCommittee.departments.push(location);
+            }
+          }
+        }
+        _ref1 = scope.schools;
+        for (school in _ref1) {
+          properties = _ref1[school];
+          _ref2 = properties.standardizedDepartments;
+          for (department in _ref2) {
+            info = _ref2[department];
+            if (scope.isDepartmentActive(department) === true) {
+              scope.departmentClicked(department);
+            }
+          }
+        }
+        _ref3 = scope.committees[committee.id].people;
+        for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
+          name = _ref3[_j];
           workLocations = scope.workInfo[name].locations;
           for (location in workLocations) {
             position = workLocations[location];
@@ -281,6 +354,9 @@
           members: scope.activeCommittee.members
         }, true);
       };
+      scope.isFoundIn = function(term, array) {
+        return array.indexOf(term) !== -1;
+      };
       scope.schoolClicked = function(school) {
         var addDepartments, selectedSchool;
         addDepartments = scope.isSchoolActive(school);
@@ -289,7 +365,7 @@
         return scope.updateGraph(selectedSchool, !addDepartments);
       };
       scope.departmentClicked = function(department) {
-        var addPeople, allActiveLocations, getLinkedSchool, linkedSchool, location, position, properties, selectedDepartment, username, _ref, _ref1;
+        var addPeople, getLinkedSchool, linkedSchool, location, locs, position, properties, selectedDepartment, username, _ref, _ref1, _ref2;
         getLinkedSchool = (function(_this) {
           return function() {
             var d, school, schoolProperties, _i, _len, _ref, _ref1;
@@ -317,21 +393,36 @@
           scope.activeDepartments.push(department);
         }
         selectedDepartment = scope.schools[linkedSchool].standardizedDepartments[department];
-        _ref = selectedDepartment.standardizedUsers;
-        for (username in _ref) {
-          properties = _ref[username];
-          _ref1 = scope.workInfo[username].locations;
-          for (location in _ref1) {
-            position = _ref1[location];
-            allActiveLocations = scope.isLocationActive(location);
-            if (allActiveLocations === false) {
-              break;
+        if (scope.graphType === "explorative") {
+          _ref = selectedDepartment.standardizedUsers;
+          for (username in _ref) {
+            properties = _ref[username];
+            locs = Object.keys(scope.workInfo[username].locations);
+            if (locs.length > 2) {
+              properties.fill = "orange";
+            } else if (locs.length === 2) {
+              if (locs[0].indexOf("School") !== -1 && locs[1].indexOf("School") !== -1) {
+                properties.fill = "orange";
+              } else {
+                properties.fill = "#000";
+              }
+            } else {
+              properties.fill = "#000";
             }
           }
-          if (allActiveLocations === false) {
-            properties.fill = "orange";
-          } else {
-            properties.fill = "#000";
+        } else if (scope.graphType === "committee") {
+          _ref1 = selectedDepartment.standardizedUsers;
+          for (username in _ref1) {
+            properties = _ref1[username];
+            _ref2 = scope.workInfo[username].locations;
+            for (location in _ref2) {
+              position = _ref2[location];
+              if (scope.isFoundIn(username, scope.activeCommittee.members)) {
+                properties.fill = "orange";
+              } else if (scope.isFoundIn(location, scope.activeCommittee.departments)) {
+                properties.fill = "yellow";
+              }
+            }
           }
         }
         return scope.updateGraph(selectedDepartment, addPeople);
@@ -366,9 +457,19 @@
       scope.isLocationActive = function(location) {
         return scope.isSchoolActive(location) || scope.isDepartmentActive(location);
       };
+
+      /*
+      Description: Checking to see if school is active
+      Input: [String] school : name of the school
+       */
       scope.isSchoolActive = function(school) {
         return __indexOf.call(scope.activeSchools, school) >= 0;
       };
+
+      /*
+      Description: Checking to see if department is active
+      Input: [String] school : name of the department
+       */
       scope.isDepartmentActive = function(department) {
         return __indexOf.call(scope.activeDepartments, department) >= 0;
       };
@@ -407,6 +508,10 @@
   });
 
   angular.module("extra_information", []).directive("extraInformation", function() {
+    var linker;
+    linker = function(scope, element, attrs) {
+      return scope.pinSchools = "Schools Pinned";
+    };
     return {
       restrict: "E",
       templateUrl: "partials/extra_info.html",

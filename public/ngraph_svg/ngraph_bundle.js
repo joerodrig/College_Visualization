@@ -31,30 +31,11 @@
         var circ, txt, ui;
         svg = svg;
         ui = svg('g');
-        circ = svg("circle").attr('fill', node.data.fill).attr('r', node.data.size).attr('class', node.data.type);
-        txt = svg('text').attr('font-size', node.data.textSize).attr('text-anchor', 'middle').attr('y', parseInt("-" + node.data.size + (-18))).attr('class', node.data.type + "_label");
+        circ = svg("circle").attr('fill', node.data.fill).attr('r', node.data.size).attr('class', node.data.type).attr('identifier', node.id);
+        txt = svg('text').attr('font-size', node.data.textSize).attr('text-anchor', 'middle').attr('y', parseInt("-" + node.data.size + (-18))).attr('class', node.data.type + "_label").attr('font-family', 'Cinzel').attr('identifier', node.id);
         txt.textContent = node.id;
         ui.append(circ);
         ui.append(txt);
-        if (node.data.type === "school_node") {
-          $(circ).click(function(e) {
-            if (e.shiftKey === true) {
-              return listeners.schoolClicked(node.id);
-            }
-          });
-        } else if (node.data.type === "department_node") {
-          $(circ).click(function(e) {
-            if (e.shiftKey === true) {
-              return listeners.departmentClicked(node.id);
-            }
-          });
-        } else if (node.data.type === "user_node") {
-          $(circ).click(function(e) {
-            if (e.shiftKey === true) {
-              return listeners.userClicked(node.id);
-            }
-          });
-        }
         return ui;
       };
     })(this)).placeNode(function(nodeUI, pos) {

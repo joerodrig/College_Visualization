@@ -11,15 +11,12 @@ class cGraph
 
 class Controller
   constructor: (data, options) ->
-    clickListeners =
-      schoolClicked     : data.schoolClicked
-      departmentClicked : data.departmentClicked
-      userClicked       : data.userClicked
-
-    employeeGraph = new EmployeeGraph(data,clickListeners,options)
+    employeeGraph = new EmployeeGraph(data,options)
     return {
       updateGraph: (nodes,adding) =>
         employeeGraph.updateGraph(nodes,adding)
+      pinNode: (node) =>
+        employeeGraph.pinNode(node)
       }
 
 
@@ -32,7 +29,6 @@ class Graph
       renderer: createdGraph.renderer
       svg     : createdGraph.svg
     }
-    return
 
 ###
   Displays all Ithaca College employees that are in a specific committee based off of the
@@ -47,22 +43,30 @@ class EmployeeGraph extends Graph
     $('#demo').append(graphElement)
     @graphParameters.renderer.run()
     @initial()
+    console.log(@graph.getNode("Ithaca College"))
+    #@graphParameters.renderer.node(@graph.getNode("Ithaca College"))
+    console.log(@graph)
+    console.log(@graphParameters)
+
+
 
 
   pinNode: (node) =>
-    console.log(@graph.getNode(node))
-    @graphParameters.renderer.layout.pinNode(@graph.getNode(node),true)
-
+    gNode = @graph.getNode(node)
+    if @graphParameters.renderer.layout.isNodePinned(gNode) isnt true
+      @graphParameters.renderer.layout.pinNode(@graph.getNode(node),true)
+    else
+      @graphParameters.renderer.layout.pinNode(@graph.getNode(node),false)
 
   initial: () =>
     totalDepartments = 0
 
     for school,properties of @schoolInfo.schools
       totalDepartments += properties.departments.length
-    mainNode = {id:"Ithaca College",type:"main" , size:totalDepartments}
+    mainNode = {id:"Ithaca College",type:"main" , size:totalDepartments, fill: "#0055bb", textSize:"38px"}
     @graphParameters.renderer.layout.pinNode(@addNode(mainNode),true)
     for school,properties of @schoolInfo.schools
-      schoolNode = {id:school,type:properties.type,size:properties.departments.length}
+      schoolNode = {id:school,type:properties.type,fill:properties.fill,textSize:"38px",size:properties.departments.length}
       @addNode(schoolNode)
       @graph.addLink(schoolNode.id,mainNode.id,schoolNode.size)
 
@@ -90,59 +94,56 @@ class EmployeeGraph extends Graph
 
   addNode: (node)=>
     if @graph.getNode(node.id) is undefined
-      if node.type is "user"
-        @graph.addNode(node.id,
-          fill: node.fill
-          size: "10"
-          textSize:"16px"
-          type:"user_node"
-        )
-      else if node.type is "department"
-        @graph.addNode(node.id,
-          fill: node.fill
-          size: node.size
-          textSize:"18px"
-          type: "department_node"
-        )
-
-      else if node.type is "school"
+      if node.type is "school"
         if node.size < 14
           node.size = 14
         else if node.size > 25
           node.size  = 25
+        node.size = node.size *2
+      @graph.addNode(node.id,
+      fill: node.fill
+      size: node.size
+      textSize: node.textSize
+      type:node.type+"_node"
+      )
+    else
+      @updateNodeAttributes(node)
 
-        @graph.addNode(node.id,
-          fill: "#bbeeff"
-          size: node.size*2
-          textSize:"38px"
-          type:"school_node")
+  ###
+  Description: Get all node links from current loaded node in graph. Remove the current node in graph. Re-add node
+  with new properties. Re-add links
+  TODO: Re-add node in same position
+  ###
+  updateNodeAttributes: (node) =>
+    #Copy node
+    #Add a new node with copied features
+    currNode = @graph.getNode(node.id)
+    currNodeLinks = currNode.links
+    links = []
+    for link in currNode.links
+      links.push(fromId:link.fromId,toId:link.toId,strength:link.data)
 
-      else if node.type is "main"
-        @graph.addNode(node.id,
-        fill: "#0055bb"
-        size: node.size
-        textSize: "38px"
-        type:"main_node"
-        )
+    @graph.removeNode(node.id)
+    @addNode(node)
+
+    for l in links
+      if l.fromId isnt node.id then @addLink(l.fromId,node.id,l.strength)
+      else @addLink(node.id,l.toId,l.strength)
 
   toggleLinks:(from,to,adding) =>
     if adding
       @addNode(to)
       @addLink(from.id,to.id,2)
     else
-      @removeLink(from.id,to.id)
+      @removeLink(from.id,to)
 
-  removeLink: (fromID,toID) =>
-    @graph.removeLink(@graph.hasLink(fromID,toID))
-    if @graph.getLinks(toID).length < 1
-      @graph.removeNode(toID)
+  removeLink: (fromID,to) =>
+    @graph.removeLink(@graph.hasLink(fromID,to.id))
+    if @graph.getLinks(to.id).length < 1 then @graph.removeNode(to.id)
+    else @updateNodeAttributes(to)
 
   addLink: (from,to,strength) =>
-    hasLink = @graph.hasLink(from,to)
-    if hasLink is null
-      @graph.addLink(from,to,strength)
-
-
+    if @graph.hasLink(from,to) is null then @graph.addLink(from,to,strength)
 
 exports = this
 exports.CommitteeGraph = new CommitteeGraph()

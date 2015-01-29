@@ -27,29 +27,19 @@ module.exports.start = (listeners) ->
     .attr('fill', node.data.fill)
     .attr('r', node.data.size)
     .attr('class', node.data.type)
-
+    .attr('identifier',node.id)
     txt = svg('text').
     attr('font-size', node.data.textSize).
     attr('text-anchor', 'middle').
     attr('y', parseInt("-" + node.data.size + (-18))).
-    attr('class', node.data.type + "_label")
+    attr('class', node.data.type + "_label").
+    attr('font-family', 'Cinzel').
+    attr('identifier',node.id)
     txt.textContent = node.id
 
     ui.append(circ)
     ui.append(txt)
 
-    if node.data.type is "school_node"
-      $(circ).click((e) =>
-        if e.shiftKey is true then listeners.schoolClicked(node.id)
-      )
-    else if node.data.type is "department_node"
-      $(circ).click((e) =>
-        if e.shiftKey is true then listeners.departmentClicked(node.id)
-      )
-    else if node.data.type is "user_node"
-      $(circ).click((e) =>
-        if e.shiftKey is true then listeners.userClicked(node.id)
-      )
     return ui
   )
   .placeNode((nodeUI, pos) ->
