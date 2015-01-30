@@ -49,11 +49,11 @@
   })();
 
   Graph = (function() {
-    function Graph(schoolInfo, listeners, options) {
+    function Graph(schoolInfo, options) {
       var createdGraph;
       this.schoolInfo = schoolInfo;
       this.options = options;
-      createdGraph = new ngraph.start(listeners);
+      createdGraph = new ngraph.start();
       this.activeFilters = [];
       this.graph = createdGraph.graph;
       this.graphParameters = {
@@ -92,9 +92,6 @@
       $('#demo').append(graphElement);
       this.graphParameters.renderer.run();
       this.initial();
-      console.log(this.graph.getNode("Ithaca College"));
-      console.log(this.graph);
-      console.log(this.graphParameters);
     }
 
     EmployeeGraph.prototype.pinNode = function(node) {

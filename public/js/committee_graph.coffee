@@ -21,8 +21,8 @@ class Controller
 
 
 class Graph
-  constructor: (@schoolInfo,listeners,@options) ->
-    createdGraph     = new ngraph.start(listeners)
+  constructor: (@schoolInfo,@options) ->
+    createdGraph     = new ngraph.start()
     @activeFilters   = []
     @graph           = createdGraph.graph
     @graphParameters =  {
@@ -43,12 +43,6 @@ class EmployeeGraph extends Graph
     $('#demo').append(graphElement)
     @graphParameters.renderer.run()
     @initial()
-    console.log(@graph.getNode("Ithaca College"))
-    #@graphParameters.renderer.node(@graph.getNode("Ithaca College"))
-    console.log(@graph)
-    console.log(@graphParameters)
-
-
 
 
   pinNode: (node) =>

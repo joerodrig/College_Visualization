@@ -20,11 +20,6 @@ ICCVApp.controller "ICCVCtrl", [
     $scope.positionCount      = []
     $scope.departmentCount    = []
     $scope.committees =
-      "C1" : {
-        id: "C1"
-        committee_name: "Committee One"
-        people: ["cmckenzie"]
-      },
       "C3":{
         id: "C3"
         committee_name: "CS Committee"
@@ -87,7 +82,6 @@ ICCVApp.directive "graph", ($http, $q) ->
       scope.expandAllSchools   = false
       scope.pinAllSchools      = false
 
-      console.log(attrs)
 
       #Convert/Correct any incorrect location information
       convert = do =>
@@ -361,6 +355,7 @@ ICCVApp.directive "graph", ($http, $q) ->
   replace: true
   templateUrl: "partials/graph.html"
   link: linker
+
 
 angular.module("extra_information", []).directive "extraInformation", ->
   linker = (scope, element, attrs) ->

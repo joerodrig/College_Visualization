@@ -2,32 +2,30 @@
 <html ng-app="ICCV">
 <head lang="en">
     <meta charset="UTF-8">
-    <title>IC Visualization</title>
+    <title>Ithaca Visualized</title>
     <link rel="stylesheet" href="css/bootstrap.min.css"/>
     <link rel="stylesheet" href="css/page-style.css"/>
     <link href='http://fonts.googleapis.com/css?family=Cinzel' rel='stylesheet' type='text/css'>
     <style type="text/css" media="screen">
     </style>
-    <script type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.8/angular.min.js"></script>
 </head>
 <body ng-controller="ICCVCtrl">
 <div style="height:100%;">
-    <!-- Committees -->
-    <!-- Disabled for Exploratory Graph -->
-   <!--
--->
-    <!-- Graph -->
     <graph id="graph_location"
-           data-graphType="committee"
+           data-graphType="explorative"
            data-initialGraph="employee"
            data-container="demo"
-           class="col-xs-12 col-sm-12"></graph>
+           class="col-xs-12">
+    </graph>
 </div>
 
+<!-- Loading Angular Minified -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.11/angular.min.js"></script>
+
+<!-- Loading JQuery Minified -->
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
-<!-- Loading Angular App Controller -->
+<!-- Loading Committee App Controller -->
 <script type="text/javascript" src="js/ICCVCtrl.js"></script>
 <!-- Loading Compiled ngraph -->
 <script type="text/javascript" src="/ngraph_svg/ngraph_bundle.js"></script>

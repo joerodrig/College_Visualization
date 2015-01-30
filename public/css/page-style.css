@@ -65,6 +65,8 @@ g {
 
 #extra_info{
     position:absolute;
+    box-shadow:1px 1px 1px black;
+    padding-right:0;
 }
 
 #settings {
@@ -84,13 +86,6 @@ g {
     cursor:pointer;
 }
 
-#position_department_count {
-    height: 80%;
-}
-
-.position_count, .department_count {
-    max-height: 80%;
-}
 
 #extra_info ul {
     list-style-type: none;

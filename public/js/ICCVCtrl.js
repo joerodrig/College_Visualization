@@ -29,11 +29,6 @@
       $scope.positionCount = [];
       $scope.departmentCount = [];
       $scope.committees = {
-        "C1": {
-          id: "C1",
-          committee_name: "Committee One",
-          people: ["cmckenzie"]
-        },
         "C3": {
           id: "C3",
           committee_name: "CS Committee",
@@ -76,7 +71,6 @@
         console.log("Graph Dependencies Loaded");
         scope.expandAllSchools = false;
         scope.pinAllSchools = false;
-        console.log(attrs);
         convert = (function(_this) {
           return function() {};
         })(this)();

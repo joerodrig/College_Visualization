@@ -1,4 +1,4 @@
-module.exports.start = (listeners) ->
+module.exports.start = () ->
   graph = require("ngraph.graph")()
   svg = require("simplesvg")
   renderer = require("ngraph.svg")(graph,
