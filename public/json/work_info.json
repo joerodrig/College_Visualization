@@ -5,7 +5,6 @@
       "location": "Roy H. Park School of Communications"
     }
   ],
-
   "jsimpson": [
     {
       "position": "Interim Dean",
@@ -16,21 +15,18 @@
       "location": "Graduate Study in Business"
     }
   ],
-
   "bhoward": [
     {
       "position": "Associate Dean and Director of MBA Programs",
       "location": "School of Business"
     }
   ],
-
   "dkline": [
     {
       "position": "Assistant Dean",
       "location": "School of Business"
     }
   ],
-
   "pdeamer": [
     {
       "position": "Marketing Communications Manager",
@@ -45,7 +41,6 @@
       "location": "Office of Marketing Communications"
     }
   ],
-
   "cdecker": [
     {
       "position": "Academic Services Coordinator",
@@ -58,43 +53,36 @@
       "location": "School of Business"
     }
   ],
-
   "shammond": [
     {
       "position": "Administrative Assistant",
       "location": "School of Business"
     }
   ],
-
   "mhaner": [
     {
       "position": "Assistant to the Dean and Budget Coordinator",
       "location": "School of Business"
     }
   ],
-
   "pperna": [
     {
       "position": "External Relations Program Director",
       "location": "School of Business"
     }
   ],
-
   "lshelhamer": [
     {
       "position": "Assessment and Research Analyst",
       "location": "School of Business"
     }
   ],
-
-
   "delias": [
     {
       "position": "Information Technology Specialist",
       "location": "School of Business"
     }
   ],
-
   "jives": [
     {
       "position": "Professor and Chair Graduate Program",
@@ -105,8 +93,6 @@
       "location": "School of Health Sciences and Human Performance"
     }
   ],
-
-
   "jives": [
     {
       "position": "Professor and Chair Graduate Program",
@@ -383,6 +369,12 @@
     {
       "position": "Interim Associate Dean",
       "location": "School of Music"
+    }
+  ],
+  "wpickren": [
+    {
+      "position": "Director for Center for Faculty Excellence & Sponsored Research",
+      "location": "Center for Faculty Excellence"
     }
   ],
   "nmenning": [
@@ -2362,6 +2354,12 @@
       "location": "School of Humanities and Sciences"
     }
   ],
+  "thoppenrath":[
+    {
+      "position": "Alumni",
+      "location": "Physical Therapy Graduate Portion"
+    }
+  ],
   "pponce": [
     {
       "position": "Associate Professor",
@@ -3374,6 +3372,13 @@
     {
       "position": "Retired Associate Professor",
       "location": "Television and Radio"
+    }
+  ],
+
+  "wasick": [
+    {
+      "position": "Administrative Assistant to the Director",
+      "location": "Center for Faculty Excellence"
     }
   ],
   "lgras": [
@@ -6930,6 +6935,12 @@
     {
       "position": "Faculty",
       "location": "School of Humanities and Sciences"
+    }
+  ],
+  "cbarboza": [
+    {
+      "position": "Electronic Resources Librarian",
+      "location": "Library"
     }
   ],
   "cdimaras": [

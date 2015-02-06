@@ -1,0 +1,11 @@
+{
+  "name": "commitee_visual",
+  "subdomain": "joerodrig3-commitee_visual",
+  "scripts": {
+    "start": "http-server"
+  },
+  "version": "0.0.0-1",
+  "engines": {
+    "node": "0.10.x"
+  }
+}

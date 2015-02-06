@@ -29,20 +29,20 @@
       $scope.positionCount = [];
       $scope.departmentCount = [];
       $scope.committees = {
-        "C3": {
-          id: "C3",
-          committee_name: "CS Committee",
-          people: ["aerkan", "dturnbull", "barr", "nprestopnik", "pdickson", "tdragon"]
-        },
-        "C4": {
-          id: "C4",
-          committee_name: "Another Committee",
-          people: ["jhilton", "euell", "ebleicher", "ppospisil"]
-        },
         "C5": {
           id: "C5",
           committee_name: "H&S Senate",
           people: ["bmurday", "jjolly", "jtennant", "cstetson", "kdsullivan", "pcole", "wdann", "mdifrancesco", "gleitman", "mklemm", "sstansfield", "rplante", "dturkon", "eganh"]
+        },
+        "C6": {
+          id: "C6",
+          committee_name: "Faculty Council",
+          people: ["dduke", "mgeiszler", "jharrington", "pwinters", "brappa", "pconstantinou", "mcozzoli", "hdichter", "dlong", "cmcnamara", "tswensen", "jwinslow", "pcole", "scondeescu", "vconger", "jfreitag", "tgalanthay", "chenderson", "tpatrone", "jpfrehm", "rosentha", "seltzer", "atheobald", "dtindall", "rwagner", "cbarboza", "dbirr", "cdimaras", "drifkin", "rothbart"]
+        },
+        "C7": {
+          id: "C7",
+          committee_name: "Instructional Dev. Fund",
+          people: ["malpass", "jbrenner", "thoppenrath", "kkomaromi", "dmontgom", "monroej", "jpowers", "wasick"]
         }
       };
       $scope.workInfo = $http.get("json/work_info.json").success(function(data, status, headers, config) {
@@ -69,6 +69,7 @@
       $q.all([scope.workInfo, scope.schools, scope.canonical]).then(function() {
         var convert, job, loadedData, nameFix, nameIssue, options, schools, user2SchoolMap, username, workInfo, _i, _len, _ref, _ref1;
         console.log("Graph Dependencies Loaded");
+        console.log("( ͡° ͜ʖ ͡° I see you  ");
         scope.expandAllSchools = false;
         scope.pinAllSchools = false;
         convert = (function(_this) {
@@ -172,7 +173,7 @@
                         type: "user",
                         size: "20",
                         textSize: "16px",
-                        fill: "#000"
+                        fill: "#4568A3"
                       });
                     } else {
                       _results1.push(void 0);
@@ -188,7 +189,7 @@
               schoolInfo = _ref2[school];
               scope.schools[school].id = school;
               scope.schools[school].type = "school";
-              scope.schools[school].fill = "#bbeeff";
+              scope.schools[school].fill = "#076DA4";
               schoolInfo.standardizedDepartments = {};
               schoolInfo.standardizedUsers = {};
               _ref3 = schoolInfo.departments;
@@ -197,8 +198,8 @@
                 schoolInfo.standardizedDepartments[department] = {
                   id: department,
                   type: "department",
-                  fill: "#88dddd",
-                  textSize: "16px"
+                  fill: "#6A93A9",
+                  textSize: "20px"
                 };
                 usersToDepartment(schoolInfo.standardizedDepartments[department]);
                 schoolInfo.standardizedDepartments[department].size = Object.keys(schoolInfo.standardizedDepartments[department].standardizedUsers).length;
@@ -237,15 +238,13 @@
         if (attrs.graphtype === "explorative") {
           scope.graphType = "explorative";
           scope.committeeBarExists = false;
-          (function() {
-            return $('svg').click(function(e) {
-              var nodeClicked;
-              nodeClicked = e.target.attributes.identifier;
-              if (nodeClicked !== void 0) {
-                return scope.nodeClicked(e);
-              }
-            });
-          })();
+          element.bind("click", function(e) {
+            var nodeClicked;
+            nodeClicked = e.toElement.attributes.identifier;
+            if (nodeClicked !== void 0) {
+              return scope.nodeClicked(e);
+            }
+          });
         } else if (attrs.graphtype === "committee") {
           scope.graphType = "committee";
           scope.committeeBarExists = true;
@@ -296,10 +295,12 @@
       };
       scope.committeeClicked = function(committee) {
         var department, info, location, name, position, properties, school, workLocations, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
-        scope.updateGraph({
-          type: "committee_links",
-          members: scope.activeCommittee.members
-        }, false);
+        if (scope.activeCommittee.id !== null) {
+          scope.updateGraph({
+            type: "committee_links",
+            members: scope.activeCommittee.members
+          }, false);
+        }
         scope.activeCommittee.members = [];
         scope.activeCommittee.departments = [];
         scope.activeCommittee.id = committee.committee_name;
@@ -332,11 +333,7 @@
           workLocations = scope.workInfo[name].locations;
           for (location in workLocations) {
             position = workLocations[location];
-            if (location.indexOf("School") !== -1) {
-              if (scope.isSchoolActive(location) === false) {
-                scope.schoolClicked(location);
-              }
-            } else {
+            if (location.indexOf("School") === -1) {
               if (scope.isDepartmentActive(location) === false) {
                 scope.departmentClicked(location);
               }
@@ -398,10 +395,10 @@
               if (locs[0].indexOf("School") !== -1 && locs[1].indexOf("School") !== -1) {
                 properties.fill = "orange";
               } else {
-                properties.fill = "#000";
+                properties.fill = "#4568A3";
               }
             } else {
-              properties.fill = "#000";
+              properties.fill = "#4568A3";
             }
           }
         } else if (scope.graphType === "committee") {
@@ -414,7 +411,7 @@
               if (scope.isFoundIn(username, scope.activeCommittee.members)) {
                 properties.fill = "orange";
               } else if (scope.isFoundIn(location, scope.activeCommittee.departments)) {
-                properties.fill = "yellow";
+                properties.fill = "#124654";
               }
             }
           }
