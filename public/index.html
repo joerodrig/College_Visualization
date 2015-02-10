@@ -11,10 +11,14 @@
 </head>
 <body ng-controller="ICCVCtrl">
 <div style="height:100%;">
-    <graph id="graph_location"
+    <graph ng-if="activeGraph == 'explorative'" id="graph_location"
+           data-graphType="explorative"
+           data-container="explorative_visual"
+           class="col-xs-12">
+    </graph>
+    <graph ng-if="activeGraph == 'committee'" id="graph_location"
            data-graphType="committee"
-           data-initialGraph="employee"
-           data-container="demo"
+           data-container="committee_visual"
            class="col-xs-12">
     </graph>
 </div>

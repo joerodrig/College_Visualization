@@ -40,7 +40,7 @@ class EmployeeGraph extends Graph
     graphElement = @graphParameters.renderer.svgRoot
     $(graphElement).attr('class','employee_visualization')
     $(graphElement).detach()
-    $('#demo').append(graphElement)
+    $("#"+@options.container).append(graphElement)
     @graphParameters.renderer.run()
     @initial()
 

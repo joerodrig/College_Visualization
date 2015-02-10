@@ -20,6 +20,7 @@
     "$scope", "$http", function($scope, $http) {
       $scope.activeDepartmentLabels = true;
       $scope.committeesMenu;
+      $scope.activeGraph = "explorative";
       $scope.activeCommittee = {
         id: null,
         members: []
@@ -51,9 +52,16 @@
       $scope.schools = $http.get("json/schools_departments.json").success(function(data, status, headers, config) {
         $scope.schools = data;
       });
-      return $scope.canonical = $http.get("json/canonical.json").success(function(data, status, headers, config) {
+      $scope.canonical = $http.get("json/canonical.json").success(function(data, status, headers, config) {
         $scope.canonical = data;
       });
+      return $scope.changeView = function() {
+        if ($scope.activeGraph === "explorative") {
+          return $scope.activeGraph = "committee";
+        } else if ($scope.activeGraph === "committee") {
+          return $scope.activeGraph = "explorative";
+        }
+      };
     }
   ]);
 
@@ -65,13 +73,13 @@
   ICCVApp.directive("graph", function($http, $q) {
     var linker;
     linker = function(scope, element, attrs) {
-      var toggleSettings;
       $q.all([scope.workInfo, scope.schools, scope.canonical]).then(function() {
         var convert, job, loadedData, nameFix, nameIssue, options, schools, user2SchoolMap, username, workInfo, _i, _len, _ref, _ref1;
         console.log("Graph Dependencies Loaded");
         console.log("( ͡° ͜ʖ ͡° I see you  ");
         scope.expandAllSchools = false;
         scope.pinAllSchools = false;
+        scope.showSettings = true;
         convert = (function(_this) {
           return function() {};
         })(this)();
@@ -250,6 +258,10 @@
           scope.committeeBarExists = true;
         }
       });
+      scope.changeGraphView = function() {
+        console.log("Switching view ");
+        scope.changeView();
+      };
       scope.nodeClicked = function(e) {
         var nodeId, nodeType;
         if (e.shiftKey === true) {
@@ -290,7 +302,7 @@
         }
         return _results;
       };
-      scope.toggleSettings = toggleSettings = function(show) {
+      scope.toggleSettings = function(show) {
         scope.showSettings = show;
       };
       scope.committeeClicked = function(committee) {

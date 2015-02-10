@@ -89,7 +89,7 @@
       graphElement = this.graphParameters.renderer.svgRoot;
       $(graphElement).attr('class', 'employee_visualization');
       $(graphElement).detach();
-      $('#demo').append(graphElement);
+      $("#" + this.options.container).append(graphElement);
       this.graphParameters.renderer.run();
       this.initial();
     }

@@ -1,24 +1,7 @@
 <div class="col-xs-5 col-sm-3 col-md-2" id="extra_info">
-    <div ng-if="committeeBarExists"
-         class="committee_sidebar col-xs-12"
-            >
-
-        <div id="committee_sidebar_header">
-            <p class="text-center"><span>Committees</span></p>
-        </div>
-        <nav class="navbar" role="navigation">
-            <ul class="nav nav-pills nav-stacked">
-                <li ng-cloak ng-show="committees"
-                    class="text-center committee noselect"
-                    ng-class="{'committee_active':obj.committee_name == activeGroupName}"
-                    ng-repeat="(key,obj) in committees"
-                    ng-click="committeeClicked(obj)">{{obj.committee_name}}
-                </li>
-            </ul>
-        </nav>
-    </div>
     <div id="settings"
-         ng-class="{'maximized' : showExtraInfo}" class="col-xs-12">
+         ng-class="{'maximized' : showExtraInfo}"
+         class="col-xs-12">
         <div id="settings_header" ng-click="toggleSettings(!showSettings)">
             <p class="text-center">
                 <span>Settings</span>
@@ -28,6 +11,10 @@
         </div>
         <div ng-show="showSettings">
             <ul>
+                <li ng-class="lead"
+                    ng-click="changeGraphView()">
+                    Current view: {{activeGraph}}
+                </li>
                 <li>
                     <input ng-class="lead"
                            ng-click="toggleSchools(expandAllSchools)"
@@ -45,6 +32,23 @@
                     <label for="pin_schools">Pin Schools</label>
                 </li>
             </ul>
+        </div>
+        <div ng-if="committeeBarExists"
+             class="committee_sidebar col-xs-12"
+                >
+            <div id="committee_sidebar_header">
+                <p class="text-center"><span>Committees</span></p>
+            </div>
+            <nav style="margin-bottom:0" class="navbar" role="navigation">
+                <ul class="nav nav-pills nav-stacked">
+                    <li ng-cloak ng-show="committees"
+                        class="text-center committee noselect"
+                        ng-class="{'committee_active':obj.committee_name == activeGroupName}"
+                        ng-repeat="(key,obj) in committees"
+                        ng-click="committeeClicked(obj)">{{obj.committee_name}}
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
 </div>

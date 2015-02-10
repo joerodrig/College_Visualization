@@ -14,6 +14,7 @@ ICCVApp.controller "ICCVCtrl", [
   ($scope, $http) ->
     $scope.activeDepartmentLabels = true
     $scope.committeesMenu
+    $scope.activeGraph        = "explorative"
     $scope.activeCommittee    = {id: null, members: []}
     $scope.activeSchools      = []
     $scope.activeDepartments  = []
@@ -59,6 +60,13 @@ ICCVApp.controller "ICCVCtrl", [
       $scope.canonical = data
       return
     )
+
+    $scope.changeView = () ->
+      if $scope.activeGraph is "explorative"
+        $scope.activeGraph = "committee"
+      else if $scope.activeGraph is "committee"
+        $scope.activeGraph = "explorative"
+
 ]
 
 ###*
@@ -76,6 +84,8 @@ ICCVApp.directive "graph", ($http, $q) ->
       console.log "( ͡° ͜ʖ ͡° I see you  "
       scope.expandAllSchools   = false
       scope.pinAllSchools      = false
+      scope.showSettings       = true
+
 
 
       #Convert/Correct any incorrect location information
@@ -186,6 +196,12 @@ ICCVApp.directive "graph", ($http, $q) ->
 
 
     #UI changes
+    scope.changeGraphView = () ->
+      console.log("Switching view ")
+      scope.changeView()
+      return
+
+
     scope.nodeClicked = (e) ->
       if e.shiftKey is true
         nodeType = e.target.className.baseVal
@@ -205,7 +221,7 @@ ICCVApp.directive "graph", ($http, $q) ->
         scope.g.pinNode(school)
 
 
-    scope.toggleSettings = toggleSettings = (show) ->
+    scope.toggleSettings = (show) ->
       scope.showSettings = show
       return
 
