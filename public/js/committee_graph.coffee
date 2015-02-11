@@ -43,6 +43,7 @@ class EmployeeGraph extends Graph
     $("#"+@options.container).append(graphElement)
     @graphParameters.renderer.run()
     @initial()
+    @committeeLinks = []
 
 
   pinNode: (node) =>
@@ -77,6 +78,7 @@ class EmployeeGraph extends Graph
 
     if primaryNode.type is "committee_links"
       previous = null
+      ###
       index = 0
       while index < primaryNode.members.length
         if primaryNode.members[index+1] isnt undefined and adding
@@ -84,6 +86,7 @@ class EmployeeGraph extends Graph
         else if adding is not true
           @graph.removeLink(@graph.hasLink(primaryNode.members[index],primaryNode.members[index+1]))
         index++
+      ###
 
 
   addNode: (node)=>
@@ -94,6 +97,7 @@ class EmployeeGraph extends Graph
         else if node.size > 25
           node.size  = 25
         node.size = node.size *2
+
       @graph.addNode(node.id,
       fill: node.fill
       size: node.size

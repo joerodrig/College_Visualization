@@ -19,12 +19,6 @@
   ICCVApp.controller("ICCVCtrl", [
     "$scope", "$http", function($scope, $http) {
       $scope.activeDepartmentLabels = true;
-      $scope.committeesMenu;
-      $scope.activeGraph = "explorative";
-      $scope.activeCommittee = {
-        id: null,
-        members: []
-      };
       $scope.activeSchools = [];
       $scope.activeDepartments = [];
       $scope.positionCount = [];
@@ -52,16 +46,9 @@
       $scope.schools = $http.get("json/schools_departments.json").success(function(data, status, headers, config) {
         $scope.schools = data;
       });
-      $scope.canonical = $http.get("json/canonical.json").success(function(data, status, headers, config) {
+      return $scope.canonical = $http.get("json/canonical.json").success(function(data, status, headers, config) {
         $scope.canonical = data;
       });
-      return $scope.changeView = function() {
-        if ($scope.activeGraph === "explorative") {
-          return $scope.activeGraph = "committee";
-        } else if ($scope.activeGraph === "committee") {
-          return $scope.activeGraph = "explorative";
-        }
-      };
     }
   ]);
 
@@ -80,6 +67,11 @@
         scope.expandAllSchools = false;
         scope.pinAllSchools = false;
         scope.showSettings = true;
+        scope.activeCommittee = {
+          id: null,
+          members: [],
+          departments: []
+        };
         convert = (function(_this) {
           return function() {};
         })(this)();
@@ -258,9 +250,39 @@
           scope.committeeBarExists = true;
         }
       });
+      scope.toggleCommitteeBar = function(exists) {
+        return scope.committeeBarExists = exists;
+      };
       scope.changeGraphView = function() {
-        console.log("Switching view ");
-        scope.changeView();
+        var department, _i, _len, _ref;
+        if (attrs.graphtype === "explorative") {
+          attrs.graphtype = "committee";
+          scope.graphType = "committee";
+          element.unbind("click");
+          scope.toggleCommitteeBar(true);
+        } else if (attrs.graphtype === "committee") {
+          scope.toggleCommitteeBar(false);
+          scope.graphType = "explorative";
+          attrs.graphtype = "explorative";
+          scope.activeCommittee = {
+            id: null,
+            members: [],
+            departments: []
+          };
+          scope.toggleSchools(false);
+          element.bind("click", function(e) {
+            var nodeClicked;
+            nodeClicked = e.toElement.attributes.identifier;
+            if (nodeClicked !== void 0) {
+              return scope.nodeClicked(e);
+            }
+          });
+          _ref = scope.activeCommittee.departments;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            department = _ref[_i];
+            scope.departmentClicked(department);
+          }
+        }
       };
       scope.nodeClicked = function(e) {
         var nodeId, nodeType;
@@ -277,7 +299,7 @@
         }
       };
       scope.toggleSchools = function(expand) {
-        var properties, school, _ref, _results;
+        var department, properties, school, _ref, _results;
         _ref = scope.schools;
         _results = [];
         for (school in _ref) {
@@ -285,7 +307,25 @@
           if (expand === true && scope.isSchoolActive(school) !== true) {
             _results.push(scope.schoolClicked(school));
           } else if (expand !== true && scope.isSchoolActive(school) === true) {
-            _results.push(scope.schoolClicked(school));
+            scope.schoolClicked(school);
+            if (scope.activeCommittee.id !== null) {
+              _results.push((function() {
+                var _i, _len, _ref1, _results1;
+                _ref1 = scope.activeCommittee.departments;
+                _results1 = [];
+                for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+                  department = _ref1[_i];
+                  if (scope.isDepartmentActive(department) !== true) {
+                    _results1.push(scope.departmentClicked(department));
+                  } else {
+                    _results1.push(void 0);
+                  }
+                }
+                return _results1;
+              })());
+            } else {
+              _results.push(void 0);
+            }
           } else {
             _results.push(void 0);
           }
@@ -405,7 +445,7 @@
               properties.fill = "orange";
             } else if (locs.length === 2) {
               if (locs[0].indexOf("School") !== -1 && locs[1].indexOf("School") !== -1) {
-                properties.fill = "orange";
+                properties.fill = "yellow";
               } else {
                 properties.fill = "#4568A3";
               }

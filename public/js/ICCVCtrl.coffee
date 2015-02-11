@@ -13,9 +13,6 @@ ICCVApp.controller "ICCVCtrl", [
   "$http"
   ($scope, $http) ->
     $scope.activeDepartmentLabels = true
-    $scope.committeesMenu
-    $scope.activeGraph        = "explorative"
-    $scope.activeCommittee    = {id: null, members: []}
     $scope.activeSchools      = []
     $scope.activeDepartments  = []
     $scope.positionCount      = []
@@ -61,11 +58,6 @@ ICCVApp.controller "ICCVCtrl", [
       return
     )
 
-    $scope.changeView = () ->
-      if $scope.activeGraph is "explorative"
-        $scope.activeGraph = "committee"
-      else if $scope.activeGraph is "committee"
-        $scope.activeGraph = "explorative"
 
 ]
 
@@ -85,6 +77,7 @@ ICCVApp.directive "graph", ($http, $q) ->
       scope.expandAllSchools   = false
       scope.pinAllSchools      = false
       scope.showSettings       = true
+      scope.activeCommittee    = {id: null, members: [],departments: []}
 
 
 
@@ -194,11 +187,32 @@ ICCVApp.directive "graph", ($http, $q) ->
 
       return
 
+    scope.toggleCommitteeBar = (exists) ->
+      scope.committeeBarExists = exists
 
     #UI changes
+
+
+    #TODO: This entire function is a hack. Fix it
     scope.changeGraphView = () ->
-      console.log("Switching view ")
-      scope.changeView()
+      if attrs.graphtype is "explorative"
+        attrs.graphtype = "committee"
+        scope.graphType = "committee"
+        element.unbind("click")
+        scope.toggleCommitteeBar(true)
+      else if attrs.graphtype is "committee"
+        scope.toggleCommitteeBar(false)
+        scope.graphType = "explorative"
+        attrs.graphtype = "explorative"
+        scope.activeCommittee    = {id: null, members: [],departments: []}
+        #NOTE Toggleschools has to go after active committee being nullified in this case
+        scope.toggleSchools(false)
+        element.bind("click",(e)->
+          nodeClicked = e.toElement.attributes.identifier
+          if nodeClicked isnt undefined then scope.nodeClicked(e)
+        )
+        for department in scope.activeCommittee.departments
+          scope.departmentClicked(department)
       return
 
 
@@ -213,7 +227,17 @@ ICCVApp.directive "graph", ($http, $q) ->
     scope.toggleSchools = (expand) ->
         for school, properties of scope.schools
           if expand is true and scope.isSchoolActive(school) isnt true then scope.schoolClicked(school)
-          else if expand isnt true and scope.isSchoolActive(school) is true then scope.schoolClicked(school)
+          else if expand isnt true and scope.isSchoolActive(school) is true
+            scope.schoolClicked(school)
+            #TODO: This ensures departments of an active committee don't stay closed. Should implement a way
+            #to make sure they never close in the first place to improve efficiency
+            if scope.activeCommittee.id isnt null
+              for department in scope.activeCommittee.departments
+                if scope.isDepartmentActive(department) isnt true
+                  scope.departmentClicked(department)
+
+
+
 
 
     scope.pinSchools = (pin) ->
@@ -290,9 +314,10 @@ ICCVApp.directive "graph", ($http, $q) ->
           locs = Object.keys(scope.workInfo[username].locations)
           if locs.length > 2 then properties.fill = "orange"
           else if locs.length is 2
-            if locs[0].indexOf("School") isnt -1 and locs[1].indexOf("School") isnt -1 then properties.fill = "orange"
+            if locs[0].indexOf("School") isnt -1 and locs[1].indexOf("School") isnt -1 then properties.fill = "yellow"
             else properties.fill = "#4568A3"
           else properties.fill = "#4568A3"
+
       else if scope.graphType is "committee"
         for username,properties of selectedDepartment.standardizedUsers
           for location,position of scope.workInfo[username].locations

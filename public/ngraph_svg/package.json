@@ -3,9 +3,10 @@
     "start": "node_modules/.bin/browserify -s ngraph ngraph_loader.js > ngraph_bundle.js"
   },
   "dependencies": {
-    "ngraph.graph": "0.0.6",
-    "ngraph.svg"  : "0.0.9",
-    "simplesvg": "0.0.8",
+    "ngraph.graph": "0.0.8",
+    "ngraph.svg"  : "0.0.12",
+    "simplesvg": "0.0.9",
+    "ngraph.tojson":"0.1.1",
     "ngraph.forcelayout": "0.0.15"
   },
   "devDependencies": {

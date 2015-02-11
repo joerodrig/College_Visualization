@@ -92,6 +92,7 @@
       $("#" + this.options.container).append(graphElement);
       this.graphParameters.renderer.run();
       this.initial();
+      this.committeeLinks = [];
     }
 
     EmployeeGraph.prototype.pinNode = function(node) {
@@ -138,7 +139,7 @@
     };
 
     EmployeeGraph.prototype.updateGraph = function(primaryNode, adding) {
-      var departmentName, index, previous, properties, username, _ref, _ref1, _results;
+      var departmentName, previous, properties, username, _ref, _ref1;
       if (primaryNode.type === "school") {
         _ref = primaryNode.standardizedDepartments;
         for (departmentName in _ref) {
@@ -154,18 +155,17 @@
         }
       }
       if (primaryNode.type === "committee_links") {
-        previous = null;
-        index = 0;
-        _results = [];
-        while (index < primaryNode.members.length) {
-          if (primaryNode.members[index + 1] !== void 0 && adding) {
-            this.graph.addLink(primaryNode.members[index], primaryNode.members[index + 1], 999);
-          } else if (adding === !true) {
-            this.graph.removeLink(this.graph.hasLink(primaryNode.members[index], primaryNode.members[index + 1]));
-          }
-          _results.push(index++);
-        }
-        return _results;
+        return previous = null;
+
+        /*
+        index = 0
+        while index < primaryNode.members.length
+          if primaryNode.members[index+1] isnt undefined and adding
+            @graph.addLink(primaryNode.members[index],primaryNode.members[index+1],999)
+          else if adding is not true
+            @graph.removeLink(@graph.hasLink(primaryNode.members[index],primaryNode.members[index+1]))
+          index++
+         */
       }
     };
 

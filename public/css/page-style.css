@@ -1,4 +1,4 @@
-#committee_visual,#explorative_visual {
+#committee_visual,#explorative_visual,#visual {
     height: 100%;
     padding: 0;
 }
@@ -26,7 +26,7 @@ g {
     cursor: pointer;
 }
 
-#graph_location {
+.graph_location {
     height: 100%;
     padding-left: 0;
     padding-right: 0;
