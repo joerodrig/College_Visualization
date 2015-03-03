@@ -4,10 +4,11 @@
 @ngdoc controller
 @name ICCV.controller:ICCVCtrl
 
-@description ICCVApp loads and manages all graph dependencies. When all dependencies are loaded, a graph instance is created
+@Description ICCVApp loads and manages all graph dependencies. When all dependencies are loaded, a graph instance is created
   on the screen.
 
 @Author Joseph Rodriguez
+@Last Modified: March 3rd, 2015
  */
 
 (function() {
@@ -119,7 +120,7 @@
         }
         return _results;
       }, processSchools = function() {
-        var department, key, school, schoolInfo, username, usersToDepartment, work, workInf, _i, _len, _ref;
+        var department, key, school, schoolInfo, username, usersToDepartment, work, workInf, _i, _len, _ref, _results;
         usersToDepartment = function(department) {
           var job, standardizedUsers, username, workInf, _results;
           department.standardizedUsers = {};
@@ -151,6 +152,7 @@
           }
           return _results;
         };
+        _results = [];
         for (school in schools) {
           schoolInfo = schools[school];
           schools[school].id = school;
@@ -173,23 +175,38 @@
               schoolInfo.standardizedDepartments[department].size = 12;
             }
           }
-          for (username in workInfo) {
-            work = workInfo[username];
-            if (work.length === 1) {
-              for (key in work) {
-                workInf = work[key];
-                if (school === workInf.location) {
-                  schoolInfo.standardizedUsers[username] = {
-                    id: username,
-                    type: "user",
-                    size: "8",
-                    fill: "#000"
-                  };
-                }
+          _results.push((function() {
+            var _results1;
+            _results1 = [];
+            for (username in workInfo) {
+              work = workInfo[username];
+              if (work.length === 1) {
+                _results1.push((function() {
+                  var _results2;
+                  _results2 = [];
+                  for (key in work) {
+                    workInf = work[key];
+                    if (school === workInf.location) {
+                      _results2.push(schoolInfo.standardizedUsers[username] = {
+                        id: username,
+                        type: "user",
+                        size: "8",
+                        fill: "#000"
+                      });
+                    } else {
+                      _results2.push(void 0);
+                    }
+                  }
+                  return _results2;
+                })());
+              } else {
+                _results1.push(void 0);
               }
             }
-          }
+            return _results1;
+          })());
         }
+        return _results;
       });
     };
 
@@ -264,6 +281,9 @@
       var linker;
       linker = function(scope, element, attrs) {
         console.log("( ͡° ͜ʖ ͡  ");
+        scope.activeDepartmentLabels = true;
+        scope.activeSchools = [];
+        scope.activeDepartments = [];
         scope.expandAllSchools = false;
         scope.pinAllSchools = false;
         scope.showSettings = true;
@@ -286,10 +306,10 @@
             scope.g = new CommitteeGraph.initialize(element[0], loadedData, options);
             if (attrs.graphtype === "explorative") {
               scope.graphType = "explorative";
-              scope.committeeBarExists = false;
+              scope.toggleCommitteeBar(false);
             } else if (attrs.graphtype === "committee") {
               scope.graphType = "committee";
-              scope.committeeBarExists = true;
+              scope.toggleCommitteeBar(true);
             }
             return $(element).on('mousedown', function(e) {
               var nodeClicked, oldX, oldY;
@@ -312,6 +332,11 @@
             return loadGraph();
           }
         });
+
+        /*
+        @Description: Show/Hide committee bar by altering the scope variable to True/False respectively
+        @Parameters : [boolean] exists
+         */
         scope.toggleCommitteeBar = function(exists) {
           return scope.committeeBarExists = exists;
         };
@@ -348,21 +373,14 @@
             return toExplorativeGraph();
           }
         };
-        scope.nodeClicked = function(e) {
-          var node, nodeId, nodeType;
-          nodeType = e.target.className.baseVal;
-          node = e.target.attributes.identifier;
-          if (node !== void 0) {
-            nodeId = node.value;
-            if (nodeType === "department_node" || nodeType === "department_node_label") {
-              return scope.departmentClicked(nodeId);
-            } else if (nodeType === "school_node" || nodeType === "school_node_label") {
-              return scope.schoolClicked(nodeId);
-            } else if (nodeType === "user_node" || nodeType === "user_node_label") {
-              return scope.userClicked(nodeId);
-            }
-          }
-        };
+
+        /*
+        @Description: Search through each school in the schools scope. Check to see if the departments are expanded in the school.
+                      If expanding is true: If the school is already expanded, skip it, else expand it
+                      If expanding is false: If the school is expanded, collapse it, else, skip it.
+        @Parameters: [boolean] expand
+        @Complexity: O(n) with n being the number of schools
+         */
         scope.toggleSchools = function(expand) {
           var department, properties, school, _ref, _results;
           _ref = scope.schools;
@@ -397,7 +415,14 @@
           }
           return _results;
         };
-        scope.pinSchools = function(pin) {
+
+        /*
+        @Description: Search through each school in the schools scope. Pin each school.
+                      NOTE: Users don't have the ability to pin individual nodes. If implemented in the future, this
+                      method should be adapted to allow for individual pinning or pinning lists of nodes.
+        @Complexity: O(n) with n being the number of schools
+         */
+        scope.pinSchools = function() {
           var properties, school, _ref, _results;
           _ref = scope.schools;
           _results = [];
@@ -408,7 +433,7 @@
           return _results;
         };
         scope.toggleSettings = function(show) {
-          scope.showSettings = show;
+          return scope.showSettings = show;
         };
         scope.committeeClicked = function(committee) {
           var department, info, location, name, position, properties, school, workLocations, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
@@ -462,8 +487,20 @@
             members: scope.activeCommittee.members
           }, true);
         };
-        scope.isFoundIn = function(term, array) {
-          return array.indexOf(term) !== -1;
+        scope.nodeClicked = function(e) {
+          var node, nodeId, nodeType;
+          nodeType = e.target.className.baseVal;
+          node = e.target.attributes.identifier;
+          if (node !== void 0) {
+            nodeId = node.value;
+            if (nodeType === "department_node" || nodeType === "department_node_label") {
+              return scope.departmentClicked(nodeId);
+            } else if (nodeType === "school_node" || nodeType === "school_node_label") {
+              return scope.schoolClicked(nodeId);
+            } else if (nodeType === "user_node" || nodeType === "user_node_label") {
+              return scope.userClicked(nodeId);
+            }
+          }
         };
         scope.schoolClicked = function(school) {
           var addDepartments, selectedSchool;
@@ -561,6 +598,17 @@
         };
 
         /*
+        @Description: Helper Method which searches through a given array for a term. Returns -1 if the term doesnt exist
+                      Returns the index of the term if it does exist.
+        @Parameters: [any] term
+                     [Array] array
+        @Returns: [Int] index of term
+         */
+        scope.isFoundIn = function(term, array) {
+          return array.indexOf(term) !== -1;
+        };
+
+        /*
         Description: We do not know or need to know whether the location is a department or school,
          only whether or not the current location is active
         Input: [String] location - location name
@@ -570,16 +618,18 @@
         };
 
         /*
-        Description: Checking to see if school is active
-        Input: [String] school : name of the school
+        @Description: Checking to see if a specific school is active
+        @Parameters : [String] school : name of the school
+        @Complexity : O(n) with n being the number of schools in activeSchools
          */
         scope.isSchoolActive = function(school) {
           return __indexOf.call(scope.activeSchools, school) >= 0;
         };
 
         /*
-        Description: Checking to see if department is active
-        Input: [String] school : name of the department
+        @Description: Checking to see if department is active
+        @Parameters : [String] school : name of the department
+        @Complexity : O(n) with n being the number of departments in activeDepartments
          */
         scope.isDepartmentActive = function(department) {
           return __indexOf.call(scope.activeDepartments, department) >= 0;
@@ -606,28 +656,28 @@
         scope.updateGraph = function(nodes, add) {
           return scope.g.updateGraph(nodes, add);
         };
+
+        /*
+        @Description: Shows/Hides Department labels within the graph
+        TODO: Needs to be implemented
+         */
         return scope.toggleDepartmentLabels = function() {
           return $scope.activeDepartmentLabels = !$scope.activeDepartmentLabels;
         };
       };
       return {
         restrict: "E",
-        replace: true,
         controller: 'graphCtrl',
         controllerAs: 'graphCtrl',
         templateUrl: "partials/graph.html",
-        link: linker
+        link: linker,
+        replace: true
       };
     }
   ]).controller('graphCtrl', function($scope, userInfoService) {
     var gCtrl;
     gCtrl = this;
     gCtrl.userInfoService = userInfoService;
-    $scope.activeDepartmentLabels = true;
-    $scope.activeSchools = [];
-    $scope.activeDepartments = [];
-    $scope.positionCount = [];
-    $scope.departmentCount = [];
     return gCtrl.userInfoService.getWorkInfo().then(function(data) {
       $scope.workInfo = data.workInfo;
       $scope.schools = data.schools;
@@ -636,10 +686,6 @@
   });
 
   ICCVApp.directive("extraInformation", function() {
-    var linker;
-    linker = function(scope, element, attrs) {
-      return scope.pinSchools = "Schools Pinned";
-    };
     return {
       restrict: "E",
       require: "^graph",
@@ -649,20 +695,13 @@
   });
 
   ICCVApp.directive('visualizationNavbar', function() {
-    var linker;
-    linker = function(scope, element, attrs) {
-      return scope.inNavBar = false;
-    };
     return {
+      restrict: "E",
       require: "^graph",
       templateUrl: "partials/navigation_bar.html",
-      replace: true,
-      restrict: "E",
-      controller: 'navbarCtrl',
-      controllerAs: 'navbarCtrl',
-      link: linker
+      replace: true
     };
-  }).controller('navbarCtrl', function() {});
+  });
 
 }).call(this);
 

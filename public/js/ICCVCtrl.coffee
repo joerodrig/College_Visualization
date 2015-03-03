@@ -2,10 +2,11 @@
 @ngdoc controller
 @name ICCV.controller:ICCVCtrl
 
-@description ICCVApp loads and manages all graph dependencies. When all dependencies are loaded, a graph instance is created
+@Description ICCVApp loads and manages all graph dependencies. When all dependencies are loaded, a graph instance is created
   on the screen.
 
 @Author Joseph Rodriguez
+@Last Modified: March 3rd, 2015
 ###
 ICCVApp = angular.module("ICCV", ['ngAnimate'])
 
@@ -46,7 +47,6 @@ ICCVApp.service('userInfoService', ($http,$q) ->
         schools   : schools
         committees: committees
       }
-
 
     #Convert/Correct any incorrect location information
     fixWorkInfo = () ->
@@ -110,10 +110,7 @@ ICCVApp.service('userInfoService', ($http,$q) ->
                   size:"8"
                   fill:"#000"
                 }
-      return
     )
-
-
 
   ###
   Load and cache work info
@@ -168,13 +165,14 @@ Committee Graph directive
 ###
 ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
   linker = (scope, element, attrs) ->
-
     console.log "( ͡° ͜ʖ ͡  "
-    scope.expandAllSchools   = false
-    scope.pinAllSchools      = false
-    scope.showSettings       = true
-    scope.activeCommittee    = {id: null, members: [],departments: []}
-
+    scope.activeDepartmentLabels = true
+    scope.activeSchools          = []
+    scope.activeDepartments      = []
+    scope.expandAllSchools       = false
+    scope.pinAllSchools          = false
+    scope.showSettings           = true
+    scope.activeCommittee    = { id: null, members: [],departments: [] }
 
     #Once all dependencies load, instantiate graph
     scope.$watch('workInfo',(newval,oldval) ->
@@ -187,15 +185,15 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
         scope.g = new CommitteeGraph.initialize(element[0], loadedData, options)
 
         if (attrs.graphtype is "explorative")
-          scope.graphType = "explorative"
-          scope.committeeBarExists = false
+          scope.graphType          = "explorative"
+          scope.toggleCommitteeBar(false)
 
         else if (attrs.graphtype is "committee")
           scope.graphType          = "committee"
-          scope.committeeBarExists = true
+          scope.toggleCommitteeBar(true)
 
 
-        #Handle Click events within element
+        #Instantiate single event listener which handles clicks on nodes
         $(element).on('mousedown',(e) ->
           oldX   = e.pageX
           oldY   = e.pageY
@@ -210,14 +208,13 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
         )
 
       #Loading graph once dependencies load
-      if (newval isnt undefined)
-        loadGraph()
+      if newval isnt undefined then loadGraph()
     )
 
-
-    #UI changes
-
-
+    ###
+    @Description: Show/Hide committee bar by altering the scope variable to True/False respectively
+    @Parameters : [boolean] exists
+    ###
     scope.toggleCommitteeBar = (exists) ->
       scope.committeeBarExists = exists
 
@@ -243,15 +240,14 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
       else if attrs.graphtype is "committee" then toExplorativeGraph()
 
 
-    scope.nodeClicked = (e) ->
-      nodeType = e.target.className.baseVal
-      node = e.target.attributes.identifier
-      if node isnt undefined
-        nodeId = node.value
-        if nodeType is "department_node" or nodeType is "department_node_label" then scope.departmentClicked(nodeId)
-        else if nodeType is "school_node" or nodeType is "school_node_label" then scope.schoolClicked(nodeId)
-        else if nodeType is "user_node" or nodeType is "user_node_label" then scope.userClicked(nodeId)
 
+    ###
+    @Description: Search through each school in the schools scope. Check to see if the departments are expanded in the school.
+                  If expanding is true: If the school is already expanded, skip it, else expand it
+                  If expanding is false: If the school is expanded, collapse it, else, skip it.
+    @Parameters: [boolean] expand
+    @Complexity: O(n) with n being the number of schools
+    ###
     scope.toggleSchools = (expand) ->
         for school, properties of scope.schools
           if expand is true and scope.isSchoolActive(school) isnt true then scope.schoolClicked(school)
@@ -265,14 +261,21 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
                   scope.departmentClicked(department)
 
 
-    scope.pinSchools = (pin) ->
+    ###
+    @Description: Search through each school in the schools scope. Pin each school.
+                  NOTE: Users don't have the ability to pin individual nodes. If implemented in the future, this
+                  method should be adapted to allow for individual pinning or pinning lists of nodes.
+    @Complexity: O(n) with n being the number of schools
+    ###
+    scope.pinSchools = () ->
       for school,properties of scope.schools
         scope.g.pinNode(school)
 
 
     scope.toggleSettings = (show) ->
       scope.showSettings = show
-      return
+
+
 
 
     scope.committeeClicked = (committee) ->
@@ -308,7 +311,14 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
       scope.updateGraph({type:"committee_links",members:scope.activeCommittee.members},true)
       return
 
-    scope.isFoundIn = (term, array) -> array.indexOf(term) isnt -1
+    scope.nodeClicked = (e) ->
+      nodeType = e.target.className.baseVal
+      node     = e.target.attributes.identifier
+      if node isnt undefined
+        nodeId = node.value
+        if nodeType is "department_node" or nodeType is "department_node_label" then scope.departmentClicked(nodeId)
+        else if nodeType is "school_node" or nodeType is "school_node_label" then scope.schoolClicked(nodeId)
+        else if nodeType is "user_node" or nodeType is "user_node_label" then scope.userClicked(nodeId)
 
     scope.schoolClicked = (school) ->
       addDepartments        = scope.isSchoolActive(school)
@@ -353,7 +363,7 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
       locationIsSchool = () ->
         return schoolsArray.indexOf(location) isnt -1
       #When a user is clicked, we want to find all of their locations and activate them
-      #It doesn't make sense to collapse locations through user interaction -- we can only add
+      #(Explorative View): It doesn't make sense to collapse locations through user interaction -- we can only add
       schoolsArray = Object.keys(scope.schools)
       for location,position of scope.workInfo[user].locations
         if locationIsSchool()
@@ -361,6 +371,17 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
             scope.schoolClicked(location)
         else if scope.isDepartmentActive(location) isnt true
           scope.departmentClicked(location)
+
+
+
+    ###
+    @Description: Helper Method which searches through a given array for a term. Returns -1 if the term doesnt exist
+                  Returns the index of the term if it does exist.
+    @Parameters: [any] term
+                 [Array] array
+    @Returns: [Int] index of term
+    ###
+    scope.isFoundIn = (term, array) -> array.indexOf(term) isnt -1
 
     ###
     Description: We do not know or need to know whether the location is a department or school,
@@ -371,14 +392,17 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
       return scope.isSchoolActive(location) or scope.isDepartmentActive(location)
 
     ###
-    Description: Checking to see if school is active
-    Input: [String] school : name of the school
+    @Description: Checking to see if a specific school is active
+    @Parameters : [String] school : name of the school
+    @Complexity : O(n) with n being the number of schools in activeSchools
     ###
     scope.isSchoolActive = (school) ->
       return school in scope.activeSchools
+
     ###
-    Description: Checking to see if department is active
-    Input: [String] school : name of the department
+    @Description: Checking to see if department is active
+    @Parameters : [String] school : name of the department
+    @Complexity : O(n) with n being the number of departments in activeDepartments
     ###
     scope.isDepartmentActive = (department) ->
       return department in scope.activeDepartments
@@ -391,31 +415,30 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
       else
         scope.activeSchools.push(school)
 
+
     scope.updateGraph = (nodes,add) ->
       scope.g.updateGraph(nodes,add)
 
+    ###
+    @Description: Shows/Hides Department labels within the graph
+    TODO: Needs to be implemented
+    ###
     scope.toggleDepartmentLabels = () ->
       $scope.activeDepartmentLabels = !$scope.activeDepartmentLabels
 
   return {
   restrict    : "E"
-  replace     : true
   controller  : 'graphCtrl'
   controllerAs: 'graphCtrl'
   templateUrl : "partials/graph.html"
   link        : linker
+  replace     : true
   }
 ])
 .controller('graphCtrl',($scope,userInfoService) ->
   gCtrl = @
   gCtrl.userInfoService = userInfoService
-  $scope.activeDepartmentLabels = true
-  $scope.activeSchools      = []
-  $scope.activeDepartments  = []
-  $scope.positionCount      = []
-  $scope.departmentCount    = []
-
-  #Loading in workInfo from service
+  #Loading graph dependencies from service
   gCtrl.userInfoService.getWorkInfo().then((data) ->
     $scope.workInfo   = data.workInfo
     $scope.schools    = data.schools
@@ -424,32 +447,17 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
 )
 
 
-ICCVApp.directive "extraInformation", ->
-  linker = (scope, element, attrs) ->
-    scope.pinSchools = "Schools Pinned"
-
-  restrict: "E"
-  require:"^graph"
+ICCVApp.directive("extraInformation",() ->
+  restrict   : "E"
+  require    :"^graph"
   templateUrl: "partials/extra_info.html"
-  replace: true
-
-
+  replace    : true
+)
 ICCVApp.directive('visualizationNavbar', () ->
-    linker = (scope,element,attrs) ->
-      scope.inNavBar      = false
-
-
-
     return {
-    require: "^graph"
+    restrict    : "E"
+    require     : "^graph"
     templateUrl : "partials/navigation_bar.html"
     replace     : true
-    restrict    : "E"
-    controller  : 'navbarCtrl'
-    controllerAs: 'navbarCtrl'
-    link: linker
     }
-)
-.controller('navbarCtrl', () ->
-  return
 )

@@ -1,23 +1,25 @@
-<nav id="top_nav"  class="navbar navbar-fixed-top">
+<nav id="top_nav" class="navbar navbar-fixed-top">
     <div class="col-xs-12">
         <div class="col-xs-3">
             <p class="lead">CV BETA</p>
         </div>
         <a href="#"
-           ng-click="changeGraphView()" class="text-center graph_type col-xs-3 col-md-2">Switch Views
+           ng-click="changeGraphView()"
+           class="text-center graph_type col-xs-3 col-md-2">Switch Views</a>
 
-                <a href="#" class = "text-center col-xs-2 col-md-2"
-                       ng-click="pinSchools(pinAllSchools = !pinAllSchools)"
-                       id="pin_schools"
-                       >Pin Schools</a>
+        <a href="#" class="text-center col-xs-2 col-md-2"
+           ng-click="pinSchools()"
+           id="pin_schools"> Pin Schools </a>
 
-                <a href="#" class="text-center col-xs-2 col-md-2"
-                        ng-click="toggleSchools(expandAllSchools = !expandAllSchools)"
-                        id="expand_schools" name="expand_schools">Expand Schools </a>
+        <a href="#" class="text-center col-xs-2 col-md-2"
+           ng-click="toggleSchools(expandAllSchools = !expandAllSchools)"
+           id="expand_schools" name="expand_schools"> Expand Schools </a>
 
-        <span class="pull-right"><img data-toggle="popover"
-                                            class="social_icon"
-                                            id="github_icon"
-                                            src="img/github.png"></span>
+        <span class="col-xs-1 pull-right">
+            <a href="https://github.com/joerodrig3/College_Visualization"><img data-toggle="popover"
+                 class="social_icon"
+                 id="github_icon"
+                 src="img/github.png"></a>
+        </span>
     </div>
 </nav>
