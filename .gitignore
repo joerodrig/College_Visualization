@@ -1,26 +1,7 @@
 workspace.xml
 Generated_files.xml
 
-.idea/.name
+.idea/*
 
-.idea/compiler.xml
+commitee_visual.iml
 
-.idea/compiler.xml
-
-.idea/.name
-
-.idea/compiler.xml
-
-.idea/encodings.xml
-
-.idea/misc.xml
-
-.idea/modules.xml
-
-.idea/modules.xml
-
-.idea/misc.xml
-
-.idea/inspectionProfiles/Project_Default.xml
-
-.idea/inspectionProfiles/profiles_settings.xml
