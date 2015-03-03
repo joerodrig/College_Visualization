@@ -2,224 +2,252 @@
 @ngdoc controller
 @name ICCV.controller:ICCVCtrl
 
-@description
+@description ICCVApp loads and manages all graph dependencies. When all dependencies are loaded, a graph instance is created
+  on the screen.
 
-
-@requires $scope
+@Author Joseph Rodriguez
 ###
-ICCVApp = angular.module("ICCV", ["extra_information"])
-ICCVApp.controller "ICCVCtrl", [
-  "$scope"
-  "$http"
-  ($scope, $http) ->
-    $scope.activeDepartmentLabels = true
-    $scope.activeSchools      = []
-    $scope.activeDepartments  = []
-    $scope.positionCount      = []
-    $scope.departmentCount    = []
-    $scope.committees =
-      "C5":{
-        id:"C5"
-        committee_name:"H&S Senate"
-        people: ["bmurday","jjolly","jtennant","cstetson","kdsullivan","pcole","wdann","mdifrancesco",
-                 "gleitman","mklemm","sstansfield","rplante","dturkon","eganh"]
-      }
-      "C6":{
-        id:"C6"
-        committee_name:"Faculty Council"
-        people: ["dduke","mgeiszler","jharrington","pwinters","brappa",
-                 "pconstantinou","mcozzoli","hdichter","dlong","cmcnamara",
-                 "tswensen","jwinslow","pcole","scondeescu","vconger",
-                 "jfreitag","tgalanthay","chenderson","tpatrone","jpfrehm",
-                 "rosentha","seltzer","atheobald","dtindall","rwagner",
-                 "cbarboza","dbirr","cdimaras","drifkin","rothbart"]
-      }
-      "C7":{
-        id:"C7"
-        committee_name:"Instructional Dev. Fund"
-        people: ["malpass","jbrenner","thoppenrath","kkomaromi","dmontgom",
-                 "monroej","jpowers","wasick"]
+ICCVApp = angular.module("ICCV", ['ngAnimate'])
+
+
+###
+The useInfoService asynchronously loads and formats all of the initial workInfo and school data
+@requires $http,$q
+###
+ICCVApp.service('userInfoService', ($http,$q) ->
+
+  ###
+  Loads and formats all dependencies to be used
+  Returns [Object]
+  ###
+  getWorkInfo = () ->
+    #Gather all dependencies
+    workInfo  = loadWorkInfo().then((workData) ->
+                  workInfo = workData
+                )
+    canonical = loadCanonical().then((canonicalData) ->
+                  canonical = canonicalData
+                )
+    schools   = loadSchools().then((schoolData) ->
+                  schools = schoolData
+    )
+    committees = loadCommittees().then((committeeData) ->
+                  committees = committeeData
+    )
+
+    $q.all([canonical,workInfo,schools,committees]).then( () ->
+      console.log("Dependencies loaded")
+      fixWorkInfo()
+      mapUsersToSchool()
+      processSchools()
+
+      return {
+        workInfo  : workInfo
+        schools   : schools
+        committees: committees
       }
 
-    # [asynchronously] Retrieving work info
-    $scope.workInfo = $http.get("json/work_info.json").success((data, status, headers, config) ->
-      $scope.workInfo = data
+
+    #Convert/Correct any incorrect location information
+    fixWorkInfo = () ->
+      for username,workInf of workInfo
+        for job in workInf
+          for jobNameIssue,jobNameFix of canonical
+            if jobNameIssue is job.location then job.location = jobNameFix
+
+    #Map users who are only linked to a school for quick access
+    mapUsersToSchool = () ->
+      inAdministration = (position) ->
+        return position.indexOf("Dean") isnt -1 or position.indexOf("Provost") isnt -1 or position.indexOf("President") isnt -1
+      for username,work of workInfo
+        for key,workInf of work
+          for school,schoolInfo of schools
+            if school is workInf.location
+              if inAdministration(workInf.position) then workInf.location = school + "Administration"
+              else if work.length is 1 then workInf.position = school + "Other"
+
+    processSchools = () ->
+      usersToDepartment = (department) ->
+        department.standardizedUsers = {}
+        standardizedUsers = department.standardizedUsers
+        for username,workInf of workInfo
+          workInfo[username].locations = {}
+          for job in workInf
+            workInfo[username].locations[job.location] = job.position
+            if job.location is department.id
+              standardizedUsers[username] = {
+                id      : username
+                type    :"user"
+                size    :"20"
+                textSize:"16px"
+                fill    :"#4568A3"
+              }
+
+      for school,schoolInfo of schools
+        schools[school].id   = school
+        schools[school].type = "school"
+        schools[school].fill = "#076DA4"
+        schoolInfo.standardizedDepartments = {}
+        schoolInfo.standardizedUsers       = {}
+        for department in schoolInfo.departments
+          schoolInfo.standardizedDepartments[department] = {
+            id      : department
+            type    :"department"
+            fill    :"#6A93A9"
+            textSize:"20px"
+          }
+          usersToDepartment(schoolInfo.standardizedDepartments[department])
+          schoolInfo.standardizedDepartments[department].size = Object.keys(schoolInfo.standardizedDepartments[department].standardizedUsers).length
+          if schoolInfo.standardizedDepartments[department].size < 12
+            schoolInfo.standardizedDepartments[department].size = 12
+        for username,work of workInfo
+          if work.length is 1
+            for key,workInf of work
+              if school is workInf.location
+                schoolInfo.standardizedUsers[username] = {
+                  id  : username,
+                  type:"user",
+                  size:"8"
+                  fill:"#000"
+                }
       return
     )
 
-    # [asynchronously] Retrieving school & department info
-    $scope.schools = $http.get("json/schools_departments.json").success((data, status, headers, config) ->
-      $scope.schools = data
-      return
+
+
+  ###
+  Load and cache work info
+  ###
+  loadWorkInfo = () ->
+    defer = $q.defer()
+    $http.get("json/work_info.json", {cache: 'true'}).success((data, status, headers, config) ->
+      defer.resolve(data)
     )
+    return defer.promise
 
-    $scope.canonical = $http.get("json/canonical.json").success((data, status, headers, config) ->
-      $scope.canonical = data
-      return
+  ###
+  Load and cache committee relationships
+  ###
+  loadCommittees = () ->
+    defer = $q.defer()
+    $http.get("json/committees.json", {cache: 'true'}).success((data, status, headers, config) ->
+      defer.resolve(data)
     )
+    return defer.promise
 
+  ###
+  Load and cache schools
+  ###
+  loadSchools = () ->
+    defer = $q.defer()
+    $http.get("json/schools_departments.json", {cache: 'true'}).success((data, status, headers, config) ->
+      defer.resolve(data)
+    )
+    return defer.promise
 
-]
+  ###
+  Load and cache canonical data
+  ###
+  loadCanonical = () ->
+    defer = $q.defer()
+    $http.get("json/canonical.json", {cache: 'true'}).success((data, status, headers, config) ->
+      defer.resolve(data)
+    )
+    return defer.promise
+
+  return {
+    getWorkInfo : getWorkInfo
+    getSchools  : loadSchools
+
+  }
+)
+
 
 ###*
 Committee Graph directive
 ###
-ICCVApp.directive "graph", ($http, $q) ->
+ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
   linker = (scope, element, attrs) ->
-    #Initialize graph(s) once required information has successfully loaded
-    $q.all([
-      scope.workInfo
-      scope.schools
-      scope.canonical
-    ]).then ->
-      console.log "Graph Dependencies Loaded"
-      console.log "( ͡° ͜ʖ ͡° I see you  "
-      scope.expandAllSchools   = false
-      scope.pinAllSchools      = false
-      scope.showSettings       = true
-      scope.activeCommittee    = {id: null, members: [],departments: []}
+
+    console.log "( ͡° ͜ʖ ͡  "
+    scope.expandAllSchools   = false
+    scope.pinAllSchools      = false
+    scope.showSettings       = true
+    scope.activeCommittee    = {id: null, members: [],departments: []}
 
 
+    #Once all dependencies load, instantiate graph
+    scope.$watch('workInfo',(newval,oldval) ->
+      loadGraph = () ->
+        options = container: attrs.container
+        loadedData =
+          workInfo         : scope.workInfo
+          schools          : scope.schools
 
-      #Convert/Correct any incorrect location information
-      convert = do =>
-      for username,workInfo of scope.workInfo
-        for job in workInfo
-          for nameIssue,nameFix of scope.canonical
-            if nameIssue is job.location then job.location = nameFix
+        scope.g = new CommitteeGraph.initialize(element[0], loadedData, options)
 
+        if (attrs.graphtype is "explorative")
+          scope.graphType = "explorative"
+          scope.committeeBarExists = false
 
-      #Map users who are only linked to a school for quick access
-      user2SchoolMap = do =>
-        inAdministration = (position) =>
-          return workInfo.position.indexOf("Dean") isnt -1 or workInfo.position.indexOf("Provost") isnt -1 or workInfo.position.indexOf("President") isnt -1
-        for username,work of scope.workInfo
-          for key,workInfo of work
-            for school,schoolInfo of scope.schools
-              if school is workInfo.location
-                if school is "School of Humanities and Sciences"
-                  administration = "Humanities and Sciences Administration"
-                  other          = "Humanities and Sciences Other"
-                else if school is "School of Music"
-                  administration = "Music Administration"
-                  other          = "Music Other"
-                else if school is "School of Health Sciences and Human Performance"
-                  administration = "Health Sciences Administration"
-                  other          = "Health Sciences Other"
-                else if school is "Roy H. Park School of Communications"
-                  administration = "Park Administration"
-                  other          = "Park Other"
-                else if school is "School of Business"
-                  administration = "Business Administration"
-                  other          = "Business Other"
-                else if school is "Orphans" then workInfo.location = "Orphans Other"
-
-                if inAdministration(workInfo.position) then workInfo.location = administration
-                else if work.length is 1 then workInfo.position = other
+        else if (attrs.graphtype is "committee")
+          scope.graphType          = "committee"
+          scope.committeeBarExists = true
 
 
-      #Make any modifications to school object before passing into graph here
-      schools = do =>
-        usersToDepartment = (department) =>
-          department.standardizedUsers = {}
-          standardizedUsers = department.standardizedUsers
-          for username,workInfo of scope.workInfo
-            scope.workInfo[username].locations = {}
-            for job in workInfo
-              scope.workInfo[username].locations[job.location] = job.position
-              if job.location is department.id
-                standardizedUsers[username] = {
-                  id: username
-                  type:"user"
-                  size:"20"
-                  textSize:"16px"
-                  fill:"#4568A3"
-                }
-
-        for school,schoolInfo of scope.schools
-          scope.schools[school].id = school
-          scope.schools[school].type = "school"
-          scope.schools[school].fill = "#076DA4"
-          schoolInfo.standardizedDepartments = {}
-          schoolInfo.standardizedUsers = {}
-          for department in schoolInfo.departments
-            schoolInfo.standardizedDepartments[department] = {
-              id: department
-              type:"department"
-              fill:"#6A93A9"
-              textSize:"20px"
-              }
-            usersToDepartment(schoolInfo.standardizedDepartments[department])
-            schoolInfo.standardizedDepartments[department].size = Object.keys(schoolInfo.standardizedDepartments[department].standardizedUsers).length
-            if schoolInfo.standardizedDepartments[department].size < 12
-              schoolInfo.standardizedDepartments[department].size = 12
-          for username,work of scope.workInfo
-            if work.length is 1
-              for key,workInfo of work
-                  if school is workInfo.location
-                    schoolInfo.standardizedUsers[username] = {
-                      id: username,
-                      type:"user",
-                      size:"8"
-                      fill:"#000"
-                    }
-        return
-
-      options = container: attrs.container
-      loadedData =
-        workInfo         : scope.workInfo
-        schools          : scope.schools
-
-      scope.g = new CommitteeGraph.initialize(element[0], loadedData, options)
-
-      if (attrs.graphtype is "explorative")
-        scope.graphType = "explorative"
-        scope.committeeBarExists = false
         #Handle Click events within element
-        element.bind("click",(e)->
-          nodeClicked = e.toElement.attributes.identifier
-          if nodeClicked isnt undefined then scope.nodeClicked(e)
+        $(element).on('mousedown',(e) ->
+          oldX   = e.pageX
+          oldY   = e.pageY
+          nodeClicked = e.target.attributes.identifier
+          if nodeClicked isnt undefined
+            element.one('mouseup',(e) ->
+              newX   = e.pageX
+              newY   = e.pageY
+              if (Math.abs(oldX - newX) < 15 and Math.abs(oldY - newY) < 15)
+                scope.nodeClicked(e)
+            )
         )
 
-      else if (attrs.graphtype is "committee")
-        scope.graphType = "committee"
-        scope.committeeBarExists = true
+      #Loading graph once dependencies load
+      if (newval isnt undefined)
+        loadGraph()
+    )
 
-      return
-
-    scope.toggleCommitteeBar = (exists) ->
-      scope.committeeBarExists = exists
 
     #UI changes
 
 
-    #TODO: This entire function is a hack. Fix it
+    scope.toggleCommitteeBar = (exists) ->
+      scope.committeeBarExists = exists
+
+
     scope.changeGraphView = () ->
-      if attrs.graphtype is "explorative"
+      toCommitteeGraph = () ->
         attrs.graphtype = "committee"
         scope.graphType = "committee"
-        element.unbind("click")
         scope.toggleCommitteeBar(true)
-      else if attrs.graphtype is "committee"
+        scope.toggleSchools(false)
+      toExplorativeGraph = () ->
         scope.toggleCommitteeBar(false)
         scope.graphType = "explorative"
         attrs.graphtype = "explorative"
         scope.activeCommittee    = {id: null, members: [],departments: []}
         #NOTE Toggleschools has to go after active committee being nullified in this case
         scope.toggleSchools(false)
-        element.bind("click",(e)->
-          nodeClicked = e.toElement.attributes.identifier
-          if nodeClicked isnt undefined then scope.nodeClicked(e)
-        )
+
         for department in scope.activeCommittee.departments
           scope.departmentClicked(department)
-      return
+
+      if attrs.graphtype is "explorative" then toCommitteeGraph()
+      else if attrs.graphtype is "committee" then toExplorativeGraph()
 
 
     scope.nodeClicked = (e) ->
-      if e.shiftKey is true
-        nodeType = e.target.className.baseVal
-        nodeId = e.target.attributes.identifier.value
+      nodeType = e.target.className.baseVal
+      node = e.target.attributes.identifier
+      if node isnt undefined
+        nodeId = node.value
         if nodeType is "department_node" or nodeType is "department_node_label" then scope.departmentClicked(nodeId)
         else if nodeType is "school_node" or nodeType is "school_node_label" then scope.schoolClicked(nodeId)
         else if nodeType is "user_node" or nodeType is "user_node_label" then scope.userClicked(nodeId)
@@ -230,14 +258,11 @@ ICCVApp.directive "graph", ($http, $q) ->
           else if expand isnt true and scope.isSchoolActive(school) is true
             scope.schoolClicked(school)
             #TODO: This ensures departments of an active committee don't stay closed. Should implement a way
-            #to make sure they never close in the first place to improve efficiency
+            #to make sure they never close in the first place
             if scope.activeCommittee.id isnt null
               for department in scope.activeCommittee.departments
                 if scope.isDepartmentActive(department) isnt true
                   scope.departmentClicked(department)
-
-
-
 
 
     scope.pinSchools = (pin) ->
@@ -268,7 +293,6 @@ ICCVApp.directive "graph", ($http, $q) ->
             scope.activeCommittee.departments.push(location)
 
       #Deactivate all departments to refresh user nodes
-      #TODO: Need to be smarter about this..Performance hit
       for school,properties of scope.schools
         for department,info of properties.standardizedDepartments
           if scope.isDepartmentActive(department) is true then scope.departmentClicked(department)
@@ -308,7 +332,6 @@ ICCVApp.directive "graph", ($http, $q) ->
       selectedDepartment = scope.schools[linkedSchool].standardizedDepartments[department]
 
       #NOTE: Depending on graph type, user nodes will take on different colors
-
       if scope.graphType is "explorative"
         for username,properties of selectedDepartment.standardizedUsers
           locs = Object.keys(scope.workInfo[username].locations)
@@ -327,13 +350,17 @@ ICCVApp.directive "graph", ($http, $q) ->
       scope.updateGraph(selectedDepartment,addPeople)
 
     scope.userClicked = (user) ->
+      locationIsSchool = () ->
+        return schoolsArray.indexOf(location) isnt -1
       #When a user is clicked, we want to find all of their locations and activate them
       #It doesn't make sense to collapse locations through user interaction -- we can only add
       schoolsArray = Object.keys(scope.schools)
       for location,position of scope.workInfo[user].locations
-        if schoolsArray.indexOf(location) isnt -1
-          if scope.isSchoolActive(location) isnt true then scope.schoolClicked(location)
-        else if scope.isDepartmentActive(location) isnt true then scope.departmentClicked(location)
+        if locationIsSchool()
+          if scope.isSchoolActive(location) isnt true
+            scope.schoolClicked(location)
+        else if scope.isDepartmentActive(location) isnt true
+          scope.departmentClicked(location)
 
     ###
     Description: We do not know or need to know whether the location is a department or school,
@@ -366,21 +393,63 @@ ICCVApp.directive "graph", ($http, $q) ->
 
     scope.updateGraph = (nodes,add) ->
       scope.g.updateGraph(nodes,add)
-      return
 
     scope.toggleDepartmentLabels = () ->
       $scope.activeDepartmentLabels = !$scope.activeDepartmentLabels
 
-  restrict: "E"
-  replace: true
-  templateUrl: "partials/graph.html"
-  link: linker
+  return {
+  restrict    : "E"
+  replace     : true
+  controller  : 'graphCtrl'
+  controllerAs: 'graphCtrl'
+  templateUrl : "partials/graph.html"
+  link        : linker
+  }
+])
+.controller('graphCtrl',($scope,userInfoService) ->
+  gCtrl = @
+  gCtrl.userInfoService = userInfoService
+  $scope.activeDepartmentLabels = true
+  $scope.activeSchools      = []
+  $scope.activeDepartments  = []
+  $scope.positionCount      = []
+  $scope.departmentCount    = []
+
+  #Loading in workInfo from service
+  gCtrl.userInfoService.getWorkInfo().then((data) ->
+    $scope.workInfo   = data.workInfo
+    $scope.schools    = data.schools
+    $scope.committees = data.committees
+  )
+)
 
 
-angular.module("extra_information", []).directive "extraInformation", ->
+ICCVApp.directive "extraInformation", ->
   linker = (scope, element, attrs) ->
     scope.pinSchools = "Schools Pinned"
 
   restrict: "E"
+  require:"^graph"
   templateUrl: "partials/extra_info.html"
   replace: true
+
+
+ICCVApp.directive('visualizationNavbar', () ->
+    linker = (scope,element,attrs) ->
+      scope.inNavBar      = false
+
+
+
+    return {
+    require: "^graph"
+    templateUrl : "partials/navigation_bar.html"
+    replace     : true
+    restrict    : "E"
+    controller  : 'navbarCtrl'
+    controllerAs: 'navbarCtrl'
+    link: linker
+    }
+)
+.controller('navbarCtrl', () ->
+  return
+)

@@ -1,0 +1,72 @@
+{
+  "C5": {
+    "id": "C5",
+    "committee_name": "H&S Senate",
+    "people": [
+      "bmurday",
+      "jjolly",
+      "jtennant",
+      "cstetson",
+      "kdsullivan",
+      "pcole",
+      "wdann",
+      "mdifrancesco",
+      "gleitman",
+      "mklemm",
+      "sstansfield",
+      "rplante",
+      "dturkon",
+      "eganh"
+    ]
+  },
+  "C6": {
+    "id": "C6",
+    "committee_name": "Faculty Council",
+    "people": [
+      "dduke",
+      "mgeiszler",
+      "jharrington",
+      "pwinters",
+      "brappa",
+      "pconstantinou",
+      "mcozzoli",
+      "hdichter",
+      "dlong",
+      "cmcnamara",
+      "tswensen",
+      "jwinslow",
+      "pcole",
+      "scondeescu",
+      "vconger",
+      "jfreitag",
+      "tgalanthay",
+      "chenderson",
+      "tpatrone",
+      "jpfrehm",
+      "rosentha",
+      "seltzer",
+      "atheobald",
+      "dtindall",
+      "rwagner",
+      "cbarboza",
+      "dbirr",
+      "cdimaras",
+      "drifkin",
+      "rothbart"
+    ]
+  },
+  "C7": {
+    "id": "C7",
+    "committee_name": "Instructional Dev. Fund",
+    "people": [
+      "malpass",
+      "jbrenner",
+      "thoppenrath",
+      "kkomaromi",
+      "dmontgom",
+      "monroej",
+      "jpowers",
+      "wasick"
+    ]
+  }
+}

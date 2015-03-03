@@ -4,12 +4,11 @@
   },
   "dependencies": {
     "ngraph.graph": "0.0.8",
-    "ngraph.svg"  : "0.0.12",
-    "simplesvg": "0.0.9",
-    "ngraph.tojson":"0.1.1",
+    "ngraph.svg"  : "0.0.13",
+    "simplesvg": "0.0.10",
     "ngraph.forcelayout": "0.0.15"
   },
   "devDependencies": {
-    "browserify": "8.1.1"
+    "browserify": "9.0.3"
   }
 }
