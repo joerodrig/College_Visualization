@@ -1,4 +1,5 @@
-<div class="col-xs-4 col-sm-2" id="extra_info">
+<div ng-if="false" class="col-xs-4 col-sm-2" id="extra_info">
+    <!-- TODO: Re-enable this when committee version is being released -->
     <div id="settings"
          ng-class="{'maximized' : showExtraInfo}"
          class="col-xs-12">
@@ -7,9 +8,8 @@
                 <span class="col-xs-12">View: {{graphType}}</span>
             </p>
         </div>
-        <div ng-if="committeeBarExists"
-             class="committee_sidebar col-xs-12"
-                >
+        <div ng-if="graphType == 'committee'"
+             class="committee_sidebar col-xs-12">
             <nav style="margin-bottom:0" class="navbar" role="navigation">
                 <ul class="nav nav-pills nav-stacked">
                     <li ng-cloak ng-show="committees"

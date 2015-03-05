@@ -167,7 +167,7 @@
               id: department,
               type: "department",
               fill: "#6A93A9",
-              textSize: "20px"
+              textSize: "26px"
             };
             usersToDepartment(schoolInfo.standardizedDepartments[department]);
             schoolInfo.standardizedDepartments[department].size = Object.keys(schoolInfo.standardizedDepartments[department].standardizedUsers).length;
@@ -282,6 +282,7 @@
       linker = function(scope, element, attrs) {
         console.log("( ͡° ͜ʖ ͡  ");
         scope.activeDepartmentLabels = true;
+        scope.schoolsPinned = false;
         scope.activeSchools = [];
         scope.activeDepartments = [];
         scope.expandAllSchools = false;
@@ -306,10 +307,8 @@
             scope.g = new CommitteeGraph.initialize(element[0], loadedData, options);
             if (attrs.graphtype === "explorative") {
               scope.graphType = "explorative";
-              scope.toggleCommitteeBar(false);
             } else if (attrs.graphtype === "committee") {
               scope.graphType = "committee";
-              scope.toggleCommitteeBar(true);
             }
             return $(element).on('mousedown', function(e) {
               var nodeClicked, oldX, oldY;
@@ -334,38 +333,26 @@
         });
 
         /*
-        @Description: Show/Hide committee bar by altering the scope variable to True/False respectively
-        @Parameters : [boolean] exists
+        @Description: Switch Graph between the committee view and the explorative view.
+        To switch graphs, alter the graphType attribute
          */
-        scope.toggleCommitteeBar = function(exists) {
-          return scope.committeeBarExists = exists;
-        };
         scope.changeGraphView = function() {
-          var toCommitteeGraph, toExplorativeGraph;
-          toCommitteeGraph = function() {
-            attrs.graphtype = "committee";
-            scope.graphType = "committee";
-            scope.toggleCommitteeBar(true);
+          var setGraphType, toCommitteeGraph, toExplorativeGraph;
+          setGraphType = function(type) {
+            attrs.graphtype = type;
+            scope.graphType = type;
             return scope.toggleSchools(false);
           };
+          toCommitteeGraph = function() {
+            return setGraphType("committee");
+          };
           toExplorativeGraph = function() {
-            var department, _i, _len, _ref, _results;
-            scope.toggleCommitteeBar(false);
-            scope.graphType = "explorative";
-            attrs.graphtype = "explorative";
-            scope.activeCommittee = {
+            setGraphType("explorative");
+            return scope.activeCommittee = {
               id: null,
               members: [],
               departments: []
             };
-            scope.toggleSchools(false);
-            _ref = scope.activeCommittee.departments;
-            _results = [];
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              department = _ref[_i];
-              _results.push(scope.departmentClicked(department));
-            }
-            return _results;
           };
           if (attrs.graphtype === "explorative") {
             return toCommitteeGraph();
@@ -382,7 +369,18 @@
         @Complexity: O(n) with n being the number of schools
          */
         scope.toggleSchools = function(expand) {
-          var department, properties, school, _ref, _results;
+          var department, pinOptions, properties, school, _ref, _results;
+          pinOptions = {
+            autoHideDelay: 1000,
+            className: "success",
+            showAnimation: "fadeIn",
+            hideAnimation: "fadeOut"
+          };
+          if (expand === true) {
+            $.notify("Schools Expanded", pinOptions);
+          } else {
+            $.notify("Schools Collapsed", pinOptions);
+          }
           _ref = scope.schools;
           _results = [];
           for (school in _ref) {
@@ -422,13 +420,24 @@
                       method should be adapted to allow for individual pinning or pinning lists of nodes.
         @Complexity: O(n) with n being the number of schools
          */
-        scope.pinSchools = function() {
-          var properties, school, _ref, _results;
+        scope.pinSchools = function(pin) {
+          var pinOptions, properties, school, _ref, _results;
+          pinOptions = {
+            autoHideDelay: 1000,
+            className: "success",
+            showAnimation: "fadeIn",
+            hideAnimation: "fadeOut"
+          };
+          if (pin === true) {
+            $.notify("Schools Pinned", pinOptions);
+          } else {
+            $.notify("Schools Un-pinned", pinOptions);
+          }
           _ref = scope.schools;
           _results = [];
           for (school in _ref) {
             properties = _ref[school];
-            _results.push(scope.g.pinNode(school));
+            _results.push(console.log(scope.g.pinNode(school)));
           }
           return _results;
         };

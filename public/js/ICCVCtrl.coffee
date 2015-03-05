@@ -94,7 +94,7 @@ ICCVApp.service('userInfoService', ($http,$q) ->
             id      : department
             type    :"department"
             fill    :"#6A93A9"
-            textSize:"20px"
+            textSize:"26px"
           }
           usersToDepartment(schoolInfo.standardizedDepartments[department])
           schoolInfo.standardizedDepartments[department].size = Object.keys(schoolInfo.standardizedDepartments[department].standardizedUsers).length
@@ -167,6 +167,7 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
   linker = (scope, element, attrs) ->
     console.log "( ͡° ͜ʖ ͡  "
     scope.activeDepartmentLabels = true
+    scope.schoolsPinned          = false
     scope.activeSchools          = []
     scope.activeDepartments      = []
     scope.expandAllSchools       = false
@@ -186,11 +187,9 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
 
         if (attrs.graphtype is "explorative")
           scope.graphType          = "explorative"
-          scope.toggleCommitteeBar(false)
 
         else if (attrs.graphtype is "committee")
           scope.graphType          = "committee"
-          scope.toggleCommitteeBar(true)
 
 
         #Instantiate single event listener which handles clicks on nodes
@@ -212,32 +211,28 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
     )
 
     ###
-    @Description: Show/Hide committee bar by altering the scope variable to True/False respectively
-    @Parameters : [boolean] exists
+    @Description: Switch Graph between the committee view and the explorative view.
+    To switch graphs, alter the graphType attribute
+
     ###
-    scope.toggleCommitteeBar = (exists) ->
-      scope.committeeBarExists = exists
-
-
     scope.changeGraphView = () ->
-      toCommitteeGraph = () ->
-        attrs.graphtype = "committee"
-        scope.graphType = "committee"
-        scope.toggleCommitteeBar(true)
-        scope.toggleSchools(false)
-      toExplorativeGraph = () ->
-        scope.toggleCommitteeBar(false)
-        scope.graphType = "explorative"
-        attrs.graphtype = "explorative"
-        scope.activeCommittee    = {id: null, members: [],departments: []}
-        #NOTE Toggleschools has to go after active committee being nullified in this case
+      setGraphType = (type) ->
+        attrs.graphtype = type
+        scope.graphType = type
         scope.toggleSchools(false)
 
-        for department in scope.activeCommittee.departments
-          scope.departmentClicked(department)
+      toCommitteeGraph = () ->
+        setGraphType("committee")
+
+      toExplorativeGraph = () ->
+        setGraphType("explorative")
+        scope.activeCommittee    = {id: null, members: [],departments: []}
+
+
 
       if attrs.graphtype is "explorative" then toCommitteeGraph()
       else if attrs.graphtype is "committee" then toExplorativeGraph()
+
 
 
 
@@ -249,16 +244,19 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
     @Complexity: O(n) with n being the number of schools
     ###
     scope.toggleSchools = (expand) ->
-        for school, properties of scope.schools
-          if expand is true and scope.isSchoolActive(school) isnt true then scope.schoolClicked(school)
-          else if expand isnt true and scope.isSchoolActive(school) is true
-            scope.schoolClicked(school)
-            #TODO: This ensures departments of an active committee don't stay closed. Should implement a way
-            #to make sure they never close in the first place
-            if scope.activeCommittee.id isnt null
-              for department in scope.activeCommittee.departments
-                if scope.isDepartmentActive(department) isnt true
-                  scope.departmentClicked(department)
+      pinOptions = {autoHideDelay:1000,className:"success",showAnimation:"fadeIn",hideAnimation:"fadeOut"}
+      if expand is true then $.notify("Schools Expanded",pinOptions)
+      else $.notify("Schools Collapsed",pinOptions)
+      for school, properties of scope.schools
+        if expand is true and scope.isSchoolActive(school) isnt true then scope.schoolClicked(school)
+        else if expand isnt true and scope.isSchoolActive(school) is true
+          scope.schoolClicked(school)
+          #TODO: This ensures departments of an active committee don't stay closed. Should implement a way
+          #to make sure they never close in the first place
+          if scope.activeCommittee.id isnt null
+            for department in scope.activeCommittee.departments
+              if scope.isDepartmentActive(department) isnt true
+                scope.departmentClicked(department)
 
 
     ###
@@ -267,9 +265,12 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
                   method should be adapted to allow for individual pinning or pinning lists of nodes.
     @Complexity: O(n) with n being the number of schools
     ###
-    scope.pinSchools = () ->
+    scope.pinSchools = (pin) ->
+      pinOptions = {autoHideDelay:1000,className:"success",showAnimation:"fadeIn",hideAnimation:"fadeOut"}
+      if pin is true then $.notify("Schools Pinned",pinOptions);
+      else  $.notify("Schools Un-pinned",pinOptions);
       for school,properties of scope.schools
-        scope.g.pinNode(school)
+        console.log scope.g.pinNode(school)
 
 
     scope.toggleSettings = (show) ->

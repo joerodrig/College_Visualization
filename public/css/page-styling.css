@@ -143,15 +143,24 @@ svg {
 Navbar
 */
 #top_nav {
-  background-color: #1E5270;
+  background-color: #2271BE;
   border-bottom: solid 1px #7b7272;
-  color: white; }
+  color: white;
+  -webkit-box-shadow: 0px 7px 18px 1px rgba(41, 69, 110, 0.74);
+  -moz-box-shadow: 0px 7px 18px 1px rgba(41, 69, 110, 0.74);
+  box-shadow: 0px 7px 18px 1px rgba(41, 69, 110, 0.74); }
   #top_nav a {
-    color: white;
-    margin-top: 15px;
+    color: #ffb700;
+    font-weight: bold;
+    margin-top: 5px;
     text-decoration: none; }
     #top_nav a:hover {
-      color: grey; }
+      color: #fff207; }
+  #top_nav p.nav_brand {
+    margin-top: 10px;
+    margin-bottom: 0; }
+  #top_nav .nav_symbol.active {
+    color: #fff207; }
   #top_nav img {
     margin-top: 7px;
     height: 35px; }
