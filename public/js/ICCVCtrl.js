@@ -437,7 +437,7 @@
           _results = [];
           for (school in _ref) {
             properties = _ref[school];
-            _results.push(console.log(scope.g.pinNode(school)));
+            _results.push(scope.g.pinNode(school));
           }
           return _results;
         };
@@ -497,7 +497,7 @@
           }, true);
         };
         scope.nodeClicked = function(e) {
-          var node, nodeId, nodeType;
+          var departmentName, node, nodeId, nodeType, properties, _ref, _results;
           nodeType = e.target.className.baseVal;
           node = e.target.attributes.identifier;
           if (node !== void 0) {
@@ -505,7 +505,16 @@
             if (nodeType === "department_node" || nodeType === "department_node_label") {
               return scope.departmentClicked(nodeId);
             } else if (nodeType === "school_node" || nodeType === "school_node_label") {
-              return scope.schoolClicked(nodeId);
+              scope.schoolClicked(nodeId);
+              if (e.shiftKey === true && scope.isSchoolActive(nodeId)) {
+                _ref = scope.schools[nodeId].standardizedDepartments;
+                _results = [];
+                for (departmentName in _ref) {
+                  properties = _ref[departmentName];
+                  _results.push(scope.departmentClicked(departmentName));
+                }
+                return _results;
+              }
             } else if (nodeType === "user_node" || nodeType === "user_node_label") {
               return scope.userClicked(nodeId);
             }
@@ -519,7 +528,53 @@
           return scope.updateGraph(selectedSchool, !addDepartments);
         };
         scope.departmentClicked = function(department) {
-          var addPeople, getLinkedSchool, linkedSchool, location, locs, position, properties, selectedDepartment, username, _ref, _ref1, _ref2;
+          var addPeople, getLinkedSchool, linkedSchool, selectedDepartment, setCommitteeUserProperties, setExplorativeUserProperties;
+          setExplorativeUserProperties = function() {
+            var locs, properties, username, _ref, _results;
+            _ref = selectedDepartment.standardizedUsers;
+            _results = [];
+            for (username in _ref) {
+              properties = _ref[username];
+              locs = Object.keys(scope.workInfo[username].locations);
+              if (locs.length > 2) {
+                _results.push(properties.fill = "orange");
+              } else if (locs.length === 2) {
+                if (locs[0].indexOf("School") === -1 && locs[1].indexOf("School") === -1) {
+                  _results.push(properties.fill = "orange");
+                } else {
+                  _results.push(properties.fill = "#4568A3");
+                }
+              } else {
+                _results.push(properties.fill = "#4568A3");
+              }
+            }
+            return _results;
+          };
+          setCommitteeUserProperties = function() {
+            var location, position, properties, username, _ref, _results;
+            _ref = selectedDepartment.standardizedUsers;
+            _results = [];
+            for (username in _ref) {
+              properties = _ref[username];
+              _results.push((function() {
+                var _ref1, _results1;
+                _ref1 = scope.workInfo[username].locations;
+                _results1 = [];
+                for (location in _ref1) {
+                  position = _ref1[location];
+                  if (scope.isFoundIn(username, scope.activeCommittee.members)) {
+                    _results1.push(properties.fill = "orange");
+                  } else if (scope.isFoundIn(location, scope.activeCommittee.departments)) {
+                    _results1.push(properties.fill = "#124654");
+                  } else {
+                    _results1.push(void 0);
+                  }
+                }
+                return _results1;
+              })());
+            }
+            return _results;
+          };
           getLinkedSchool = (function(_this) {
             return function() {
               var d, school, schoolProperties, _i, _len, _ref, _ref1;
@@ -548,36 +603,9 @@
           }
           selectedDepartment = scope.schools[linkedSchool].standardizedDepartments[department];
           if (scope.graphType === "explorative") {
-            _ref = selectedDepartment.standardizedUsers;
-            for (username in _ref) {
-              properties = _ref[username];
-              locs = Object.keys(scope.workInfo[username].locations);
-              if (locs.length > 2) {
-                properties.fill = "orange";
-              } else if (locs.length === 2) {
-                if (locs[0].indexOf("School") !== -1 && locs[1].indexOf("School") !== -1) {
-                  properties.fill = "yellow";
-                } else {
-                  properties.fill = "#4568A3";
-                }
-              } else {
-                properties.fill = "#4568A3";
-              }
-            }
+            setExplorativeUserProperties();
           } else if (scope.graphType === "committee") {
-            _ref1 = selectedDepartment.standardizedUsers;
-            for (username in _ref1) {
-              properties = _ref1[username];
-              _ref2 = scope.workInfo[username].locations;
-              for (location in _ref2) {
-                position = _ref2[location];
-                if (scope.isFoundIn(username, scope.activeCommittee.members)) {
-                  properties.fill = "orange";
-                } else if (scope.isFoundIn(location, scope.activeCommittee.departments)) {
-                  properties.fill = "#124654";
-                }
-              }
-            }
+            setCommitteeUserProperties();
           }
           return scope.updateGraph(selectedDepartment, addPeople);
         };

@@ -270,13 +270,11 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
       if pin is true then $.notify("Schools Pinned",pinOptions);
       else  $.notify("Schools Un-pinned",pinOptions);
       for school,properties of scope.schools
-        console.log scope.g.pinNode(school)
+        scope.g.pinNode(school)
 
 
     scope.toggleSettings = (show) ->
       scope.showSettings = show
-
-
 
 
     scope.committeeClicked = (committee) ->
@@ -318,7 +316,11 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
       if node isnt undefined
         nodeId = node.value
         if nodeType is "department_node" or nodeType is "department_node_label" then scope.departmentClicked(nodeId)
-        else if nodeType is "school_node" or nodeType is "school_node_label" then scope.schoolClicked(nodeId)
+        else if nodeType is "school_node" or nodeType is "school_node_label"
+          scope.schoolClicked(nodeId)#Activate School
+          if e.shiftKey is true and scope.isSchoolActive(nodeId)#Activate all departments in school
+            for departmentName,properties of scope.schools[nodeId].standardizedDepartments
+              scope.departmentClicked(departmentName)
         else if nodeType is "user_node" or nodeType is "user_node_label" then scope.userClicked(nodeId)
 
     scope.schoolClicked = (school) ->
@@ -328,6 +330,21 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
       scope.updateGraph(selectedSchool,!addDepartments)
 
     scope.departmentClicked = (department) ->
+      setExplorativeUserProperties = () ->
+        for username,properties of selectedDepartment.standardizedUsers
+          locs = Object.keys(scope.workInfo[username].locations)
+          if locs.length > 2 then properties.fill = "orange"
+          else if locs.length is 2
+            if locs[0].indexOf("School") is -1 and locs[1].indexOf("School") is -1 then properties.fill = "orange"
+            else properties.fill = "#4568A3"
+          else properties.fill = "#4568A3"
+      setCommitteeUserProperties = () ->
+        for username,properties of selectedDepartment.standardizedUsers
+          for location,position of scope.workInfo[username].locations
+            if scope.isFoundIn(username,scope.activeCommittee.members) then properties.fill = "orange"
+            else if scope.isFoundIn(location,scope.activeCommittee.departments) then properties.fill = "#124654"
+
+
       getLinkedSchool = () =>
         for school,schoolProperties of scope.schools
           for d in schoolProperties.departments
@@ -343,20 +360,8 @@ ICCVApp.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
       selectedDepartment = scope.schools[linkedSchool].standardizedDepartments[department]
 
       #NOTE: Depending on graph type, user nodes will take on different colors
-      if scope.graphType is "explorative"
-        for username,properties of selectedDepartment.standardizedUsers
-          locs = Object.keys(scope.workInfo[username].locations)
-          if locs.length > 2 then properties.fill = "orange"
-          else if locs.length is 2
-            if locs[0].indexOf("School") isnt -1 and locs[1].indexOf("School") isnt -1 then properties.fill = "yellow"
-            else properties.fill = "#4568A3"
-          else properties.fill = "#4568A3"
-
-      else if scope.graphType is "committee"
-        for username,properties of selectedDepartment.standardizedUsers
-          for location,position of scope.workInfo[username].locations
-            if scope.isFoundIn(username,scope.activeCommittee.members) then properties.fill = "orange"
-            else if scope.isFoundIn(location,scope.activeCommittee.departments) then properties.fill = "#124654"
+      if scope.graphType is "explorative" then setExplorativeUserProperties()
+      else if scope.graphType is "committee" then  setCommitteeUserProperties()
 
       scope.updateGraph(selectedDepartment,addPeople)
 
