@@ -1,0 +1,18 @@
+<div>
+    <interactive-bar></interactive-bar>
+    <committee-bar class="noLeftPadding"></committee-bar>
+    <div class="slideInUp" ng-show="workInfo" id="visual"></div>
+    <div id="graph_loading">
+        <h3 ng-if="!workInfo">Loading Graph </h3>
+        <div ng-if="!workInfo" class="spinner circles">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+</div>

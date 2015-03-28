@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "interactive_bar.js",
+  "sourceRoot": "",
+  "sources": [
+    "interactive_bar.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAAA;AAAA,MAAA,kBAAA;;AAAA,EAAA,kBAAA,GAAqB,OAAO,CAAC,MAAR,CAAe,qBAAf,EAAqC,EAArC,CAArB,CAAA;;AAAA,EAEA,kBAAkB,CAAC,SAAnB,CAA6B,gBAA7B,EAA+C,SAAA,GAAA;AAC7C,WAAO;AAAA,MACP,QAAA,EAAc,GADP;AAAA,MAEP,OAAA,EAAc,aAFP;AAAA,MAGP,WAAA,EAAc,sEAHP;AAAA,MAIP,OAAA,EAAc,IAJP;KAAP,CAD6C;EAAA,CAA/C,CAFA,CAAA;AAAA"
+}

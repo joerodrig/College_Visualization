@@ -1,0 +1,82 @@
+<div class="col-xs-12">
+    <nav id="top_nav" class="navbar navbar-fixed-top">
+        <div class="col-xs-12">
+            <div class="col-xs-3">
+                <p class="lead nav_brand">Ithaca Visualized</p>
+            </div>
+
+            <!-- TODO: Re-enable this when committee version is being released
+            <!--
+            <a href="#"
+               ng-click="changeGraphView()"
+               class="text-center graph_type col-xs-3 col-md-2">
+                <span class="glyphicon glyphicon-th-large col-xs-12"></span>
+                Switch Views</a>
+                -->
+
+
+            <a href="#" class="text-center col-xs-2 col-md-2"
+               ng-click="pinSchools(schoolsPinned = !schoolsPinned)"
+               id="pin_schools">
+            <span
+                    ng-class="{ 'active':schoolsPinned, 'inactive':!schoolsPinned }"
+                    class="glyphicon glyphicon-pushpin col-xs-12 nav_symbol"></span> Pin Schools </a>
+
+            <a href="#" class="text-center col-xs-2 col-md-2"
+               ng-click="toggleSchools(expandAllSchools = !expandAllSchools)"
+               id="expand_schools" name="expand_schools">
+            <span ng-class="{ 'active':expandAllSchools, 'inactive':!expandAllSchools }"
+                  class="glyphicon glyphicon-expand col-xs-12 nav_symbol"></span>
+                Expand Schools </a>
+
+            <a href="#" class="text-center col-xs-2 col-md-2" data-toggle="modal" data-target="#myModal"
+                    >
+                <span class="glyphicon glyphicon-info-sign col-xs-12"></span>
+                Information </a>
+
+        <span class="col-xs-1 pull-right">
+            <a href="https://github.com/joerodrig3/College_Visualization"><img
+                    class="social_icon"
+                    id="github_icon"
+                    src="img/github.png"></a>
+        </span>
+        </div>
+    </nav>
+
+
+    <!-- Information Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Information</h4>
+                </div>
+                <div class="modal-body">
+                    <p class="lead">Description: </p>
+                    <p><i>Ithaca Visualized</i> displays the structure of faculty and staff members at Ithaca College based
+                        off of their public work information listed in the Ithaca College directory.</p>
+
+                    <p class="lead">Understanding the structure:</p>
+                    <p> The size of schools are based off of how many departments are located in the school</p>
+                    <p> The size of a department is based off of how many people are located in the department</p>
+
+                    <p class="lead">Understanding the colors:</p>
+                    <p> Faculty and staff members who are only assigned to a single department or school are represented
+                        as a light blue dot</p>
+                    <p>Faculty and staff members assigned to multiple departments are represented as a yellow dot. By clicking one of these
+                        members, you can expand the other departments or schools that they are a part of.
+                    </p>
+
+                    <p class="lead">More information:</p>
+                    <p>If you would like to learn more about this project, or have any ideas as to what can be further
+                        improved or implemented, please contact me at jrodrig3@ithaca.edu</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

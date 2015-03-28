@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "committeeBarDirective.js",
+  "sourceRoot": "",
+  "sources": [
+    "committeeBarDirective.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAAA;AAAA,MAAA,gBAAA;;AAAA,EAAA,gBAAA,GAAmB,OAAO,CAAC,MAAR,CAAe,mBAAf,EAAmC,EAAnC,CAAnB,CAAA;;AAAA,EAEA,gBAAgB,CAAC,SAAjB,CAA2B,cAA3B,EAA0C,SAAA,GAAA;WACxC;AAAA,MAAA,QAAA,EAAa,GAAb;AAAA,MACA,OAAA,EAAY,aADZ;AAAA,MAEA,WAAA,EAAa,kEAFb;AAAA,MAGA,OAAA,EAAa,IAHb;MADwC;EAAA,CAA1C,CAFA,CAAA;AAAA"
+}
