@@ -2,13 +2,13 @@
 @ngdoc controller
 @name ICCV.controller:ICCVCtrl
 
-@Description ICCVApp loads and manages all
+@Description ICCVApp loads in all dependencies.
+  Creates a service to format and communicate user data between directives
 
 @Author Joseph Rodriguez
-@Last Modified: March 27th, 2015
+@Last Modified: March 28th, 2015
 ###
 ICCVApp = angular.module("ICCV", [
-  'ngAnimate',
   'iccv.graph',
   'iccv.committeeBar',
   'iccv.interactiveBar']);
@@ -120,7 +120,7 @@ ICCVApp.service('userInfoService', ($http,$q) ->
   ###
   loadWorkInfo = () ->
     defer = $q.defer()
-    $http.get("json/work_info.json", {cache: 'true'}).success((data, status, headers, config) ->
+    $http.get("assets/json/work_info.json", {cache: 'true'}).success((data, status, headers, config) ->
       defer.resolve(data)
     )
     return defer.promise
@@ -130,7 +130,7 @@ ICCVApp.service('userInfoService', ($http,$q) ->
   ###
   loadCommittees = () ->
     defer = $q.defer()
-    $http.get("json/committees.json", {cache: 'true'}).success((data, status, headers, config) ->
+    $http.get("assets/json/committees.json", {cache: 'true'}).success((data, status, headers, config) ->
       defer.resolve(data)
     )
     return defer.promise
@@ -140,7 +140,7 @@ ICCVApp.service('userInfoService', ($http,$q) ->
   ###
   loadSchools = () ->
     defer = $q.defer()
-    $http.get("json/schools_departments.json", {cache: 'true'}).success((data, status, headers, config) ->
+    $http.get("assets/json/schools_departments.json", {cache: 'true'}).success((data, status, headers, config) ->
       defer.resolve(data)
     )
     return defer.promise
@@ -150,7 +150,7 @@ ICCVApp.service('userInfoService', ($http,$q) ->
   ###
   loadCanonical = () ->
     defer = $q.defer()
-    $http.get("json/canonical.json", {cache: 'true'}).success((data, status, headers, config) ->
+    $http.get("assets/json/canonical.json", {cache: 'true'}).success((data, status, headers, config) ->
       defer.resolve(data)
     )
     return defer.promise

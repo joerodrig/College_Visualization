@@ -134,6 +134,13 @@ svg {
   height: 100%; }
   svg g {
     cursor: pointer; }
+  svg .employee_node {
+    fill: #4568A3;
+    font-size: 16px; }
+  svg .school_node {
+    fill: #076DA4; }
+  svg .school_node_label {
+    font-size: 38px; }
 
 #committee_visual, #explorative_visual, #visual {
   height: 100%;

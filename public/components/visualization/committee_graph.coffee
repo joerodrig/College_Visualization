@@ -61,7 +61,7 @@ class EmployeeGraph extends Graph
     mainNode = {id:"Ithaca College",type:"main" , size:totalDepartments, fill: "#0055bb", textSize:"38px"}
     @graphParameters.renderer.layout.pinNode(@addNode(mainNode),true)
     for school,properties of @schoolInfo.schools
-      schoolNode = {id:school,type:properties.type,fill:properties.fill,textSize:"38px",size:properties.departments.length}
+      schoolNode = {id:school,type:properties.type,size:properties.departments.length}
       @addNode(schoolNode)
       @graph.addLink(schoolNode.id,mainNode.id,schoolNode.size)
 

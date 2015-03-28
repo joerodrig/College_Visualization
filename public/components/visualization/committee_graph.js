@@ -128,8 +128,6 @@
         schoolNode = {
           id: school,
           type: properties.type,
-          fill: properties.fill,
-          textSize: "38px",
           size: properties.departments.length
         };
         this.addNode(schoolNode);

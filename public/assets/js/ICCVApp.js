@@ -4,16 +4,17 @@
 @ngdoc controller
 @name ICCV.controller:ICCVCtrl
 
-@Description ICCVApp loads and manages all
+@Description ICCVApp loads in all dependencies.
+  Creates a service to format and communicate user data between directives
 
 @Author Joseph Rodriguez
-@Last Modified: March 27th, 2015
+@Last Modified: March 28th, 2015
  */
 
 (function() {
   var ICCVApp;
 
-  ICCVApp = angular.module("ICCV", ['ngAnimate', 'iccv.graph', 'iccv.committeeBar', 'iccv.interactiveBar']);
+  ICCVApp = angular.module("ICCV", ['iccv.graph', 'iccv.committeeBar', 'iccv.interactiveBar']);
 
 
   /*
@@ -218,7 +219,7 @@
     loadWorkInfo = function() {
       var defer;
       defer = $q.defer();
-      $http.get("json/work_info.json", {
+      $http.get("assets/json/work_info.json", {
         cache: 'true'
       }).success(function(data, status, headers, config) {
         return defer.resolve(data);
@@ -232,7 +233,7 @@
     loadCommittees = function() {
       var defer;
       defer = $q.defer();
-      $http.get("json/committees.json", {
+      $http.get("assets/json/committees.json", {
         cache: 'true'
       }).success(function(data, status, headers, config) {
         return defer.resolve(data);
@@ -246,7 +247,7 @@
     loadSchools = function() {
       var defer;
       defer = $q.defer();
-      $http.get("json/schools_departments.json", {
+      $http.get("assets/json/schools_departments.json", {
         cache: 'true'
       }).success(function(data, status, headers, config) {
         return defer.resolve(data);
@@ -260,7 +261,7 @@
     loadCanonical = function() {
       var defer;
       defer = $q.defer();
-      $http.get("json/canonical.json", {
+      $http.get("assets/json/canonical.json", {
         cache: 'true'
       }).success(function(data, status, headers, config) {
         return defer.resolve(data);

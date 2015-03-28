@@ -55,7 +55,35 @@ svg {
   g {
    cursor:pointer;
   }
+
+  .employee_node{
+    fill: #4568A3;
+    font-size:16px;
+
+  }
+
+  .multi_homed_instructor_node{
+
+  }
+
+  .school_node{
+    fill: #076DA4;
+
+
+  }
+
+  .school_node_label{
+    font-size:38px;
+  }
+
+  .department_node{
+
+  }
+
 }
+
+
+
 
 #committee_visual,#explorative_visual,#visual {
   height: 100%;
