@@ -154,7 +154,7 @@ ICCVGraph.directive("graph",['userInfoService', ($http, $q,userInfoService) ->
     scope.nodeClicked = (e) ->
       nodeType = e.target.className.baseVal
       node     = e.target.attributes.identifier
-      if node isnt undefined
+      unless node is undefined
         nodeId = node.value
         if nodeType is "department_node" or nodeType is "department_node_label" then scope.departmentClicked(nodeId)
         else if nodeType is "school_node" or nodeType is "school_node_label"
