@@ -3,9 +3,11 @@
 <a href="http://www.jrodrig.com/projects/college_visualization"> Click here to view </a>
 
 <h4> Running Locally:</h4>
-<code>git clone https://github.com/joerodrig3/College_Visualization.git</code>
-<code>npm install</code>
-<code>node app.js</code>
+```
+git clone https://github.com/joerodrig3/College_Visualization.git
+npm install
+node app.js
+```
 
 
 <h4> Tools used: </h4>
