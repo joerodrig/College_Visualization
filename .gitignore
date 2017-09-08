@@ -1,11 +1,11 @@
 workspace.xml
 Generated_files.xml
-
-.idea/*
-
 commitee_visual.iml
-
-
 *.iml
 
-.idea/watcherTasks.xml
+# Ignore node modules
+/node_modules
+
+# Ignore log files
+yarn-error.log
+npm-debug.log
