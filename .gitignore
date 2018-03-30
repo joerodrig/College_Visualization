@@ -9,3 +9,4 @@ commitee_visual.iml
 # Ignore log files
 yarn-error.log
 npm-debug.log
+*.swp
