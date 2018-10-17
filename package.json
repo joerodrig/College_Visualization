@@ -2,10 +2,7 @@
   "name": "commitee_visual",
   "subdomain": "joerodrig3-commitee_visual",
   "scripts": {},
-  "version": "0.0.0-1",
-  "engines": {
-    "node": "8.9.4"
-  },
+  "version": "0.0.0-1"
   "devDependencies": {
     "angular": "^1.3.14"
   },
